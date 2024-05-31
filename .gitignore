@@ -37,4 +37,4 @@ out/
 .vscode/
 
 ### apiKey ###
-/src/**/*.properties
+application.properties

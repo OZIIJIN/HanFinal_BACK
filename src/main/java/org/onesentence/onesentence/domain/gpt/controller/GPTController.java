@@ -15,10 +15,10 @@ import org.springframework.web.client.RestTemplate;
 @RequestMapping("/api/v1/chatGpt")
 public class GPTController {
 
-	@Value("${openai.model}")
+	@Value("${openai.model:gpt-3.5-turbo}")
 	private String model;
 
-	@Value("${openai.api.url}")
+	@Value("${openai.api.url:https://api.openai.com/v1/chat/completions}")
 	private String apiUrl;
 
 	private final RestTemplate restTemplate;

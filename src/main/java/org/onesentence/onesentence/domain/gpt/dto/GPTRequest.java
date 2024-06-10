@@ -25,11 +25,13 @@ public class GPTRequest {
 		this.messages = new ArrayList<>();
 		this.messages.add(new Message("system", "assistant는 일정 관리 해주는 앱이야."));
 		this.messages.add(new Message("user", prompt));
-		this.messages.add(new Message("system", """
-			 이 문장 일정 등록하려고 하는데 일정 내용, 카테고리로 JSON 형태로 분류 해줘. 예시: {
-			  "title": "테니스",
-			  "category": "운동",
-			}"""));
+		this.messages.add(new Message("system",
+			"이 문장 일정 등록하려고 하는데 일정 내용, 카테고리, 날짜로 JSON 형태로 분류 해줘. 현재 날짜는 " + LocalDateTime.now()
+				+ "이야. 예시: {\n"
+				+ "\t\t\t  \"title\": \"테니스\",\n"
+				+ "\t\t\t  \"category\": \"운동\",\n"
+				+ "\t\t\t  \"date\": \"2023-11-12T16:34:30.388\"\n"
+				+ "\t\t\t}"));
 		this.temperature = temperature;
 		this.maxTokens = maxTokens;
 		this.topP = topP;

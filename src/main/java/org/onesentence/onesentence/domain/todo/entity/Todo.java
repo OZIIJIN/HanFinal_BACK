@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.onesentence.onesentence.domain.todo.dto.TodoRequest;
 
 @Getter
 @Entity
@@ -40,12 +41,12 @@ public class Todo {
 	@Column
 	private TodoStatus status;
 
-	public Todo(String title, LocalDateTime date, Path path, Long categoryId, Long colorId) {
-		this.title = title;
-		this.date = date;
-		this.path = path;
-		this.categoryId = categoryId;
-		this.colorId = colorId;
+	public Todo(TodoRequest request) {
+		this.title = request.getTitle();
+		this.date = request.getDate();
+		this.path = request.getPath();
+		this.categoryId = request.getCategoryId();
+		this.colorId = request.getColorId();
 		this.status = TodoStatus.TODO;
 	}
 

@@ -22,7 +22,7 @@ public class CategoryController {
 
 
 	@PostMapping
-	public ResponseEntity<String> createCategory(@Valid @RequestBody CategoryRequest request) {
+	public ResponseEntity<String> createCategory(@RequestBody CategoryRequest request) {
 
 		Long categoryId = categoryService.createCategory(request);
 

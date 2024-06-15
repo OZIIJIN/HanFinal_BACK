@@ -10,4 +10,6 @@ public interface TodoService {
 	Long updateTodo(TodoRequest request, Long todoId);
 
 	Todo findById(Long todoId);
+
+	void deleteTodo(Long todoId);
 }

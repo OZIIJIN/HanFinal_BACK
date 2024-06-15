@@ -22,11 +22,18 @@ public class TodoController {
 		return ResponseEntity.created(URI.create("/api/v1/todos/" + todoId)).build();
 	}
 
-	@PutMapping
+	@PutMapping("/{todoId}")
 	public ResponseEntity<String> updateTodo(@RequestBody TodoRequest request, @PathVariable Long todoId) {
 		Long updatedTodoId = todoService.updateTodo(request, todoId);
 
 		return ResponseEntity.created(URI.create("/api/v1/todos/" + todoId)).build();
+	}
+
+	@DeleteMapping("/{todoId}")
+	public ResponseEntity<Void> deleteTodo(@PathVariable Long todoId) {
+		todoService.deleteTodo(todoId);
+
+		return ResponseEntity.ok().build();
 	}
 
 }

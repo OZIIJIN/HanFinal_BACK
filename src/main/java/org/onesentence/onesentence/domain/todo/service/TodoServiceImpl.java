@@ -41,4 +41,11 @@ public class TodoServiceImpl implements TodoService{
 		return todoJpaRepository.findById(todoId).orElseThrow(() -> new NotFoundException(
 			ExceptionStatus.NOT_FOUND));
 	}
+
+	@Override
+	@Transactional
+	public void deleteTodo(Long todoId) {
+		Todo todo = findById(todoId);
+		todoJpaRepository.delete(todo);
+	}
 }

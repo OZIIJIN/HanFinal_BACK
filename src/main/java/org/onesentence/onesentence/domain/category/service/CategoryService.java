@@ -10,4 +10,6 @@ public interface CategoryService {
 	Long updateCategory(CategoryRequest request, Long categoryId);
 
 	Category findById(Long categoryId);
+
+	void deleteCategory(Long categoryId);
 }

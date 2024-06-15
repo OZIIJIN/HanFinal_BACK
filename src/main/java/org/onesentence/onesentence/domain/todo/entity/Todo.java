@@ -48,10 +48,7 @@ public class Todo {
 		this.categoryId = request.getCategoryId();
 		this.colorId = request.getColorId();
 		this.status = TodoStatus.TODO;
-	}
-
-	public void setDue(LocalDateTime due) {
-		this.date = due;
+		this.due = request.getDue()
 	}
 
 	public void changeToInProgress() {
@@ -67,5 +64,6 @@ public class Todo {
 		this.date = request.getDate();
 		this.categoryId = request.getCategoryId();
 		this.colorId = request.getColorId();
+		this.due = request.getDue();
 	}
 }

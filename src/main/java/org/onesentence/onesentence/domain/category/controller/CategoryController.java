@@ -2,6 +2,7 @@ package org.onesentence.onesentence.domain.category.controller;
 
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
 import org.onesentence.onesentence.domain.category.dto.CategoryRequest;
 import org.onesentence.onesentence.domain.category.service.CategoryService;
 import org.springframework.http.ResponseEntity;
@@ -30,5 +31,13 @@ public class CategoryController {
 		Long updatedCategoryId = categoryService.updateCategory(request, categoryId);
 
 		return ResponseEntity.created(URI.create("/api/v1/categories/" + updatedCategoryId)).build();
+	}
+
+	@DeleteMapping("/{categoryId}")
+	public ResponseEntity<Void> deleteCategory(@PathVariable Long categoryId) {
+
+		categoryService.deleteCategory(categoryId);
+
+		return ResponseEntity.ok().build();
 	}
 }

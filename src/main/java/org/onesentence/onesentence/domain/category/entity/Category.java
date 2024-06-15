@@ -23,4 +23,8 @@ public class Category {
 	public Category(CategoryRequest request) {
 		this.category = request.getCategory();
 	}
+
+	public void updateCategory(CategoryRequest request) {
+		this.category = request.getCategory();
+	}
 }

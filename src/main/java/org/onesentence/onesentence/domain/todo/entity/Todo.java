@@ -62,10 +62,10 @@ public class Todo {
 		this.status = TodoStatus.DONE;
 	}
 
-	public void updateTodo(String title, LocalDateTime date, Long categoryId, Long colorId) {
-		this.title = title;
-		this.date = date;
-		this.categoryId = categoryId;
-		this.colorId = colorId;
+	public void updateTodo(TodoRequest request) {
+		this.title = request.getTitle();
+		this.date = request.getDate();
+		this.categoryId = request.getCategoryId();
+		this.colorId = request.getColorId();
 	}
 }

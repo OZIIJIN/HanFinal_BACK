@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.onesentence.onesentence.domain.todo.dto.TodoRequest;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 
 @Getter
 @Entity
@@ -48,7 +49,7 @@ public class Todo {
 		this.categoryId = request.getCategoryId();
 		this.colorId = request.getColorId();
 		this.status = TodoStatus.TODO;
-		this.due = request.getDue()
+		this.due = request.getDue();
 	}
 
 	public void changeToInProgress() {

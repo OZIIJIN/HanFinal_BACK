@@ -1,6 +1,7 @@
 package org.onesentence.onesentence.domain.todo.service;
 
 import org.onesentence.onesentence.domain.todo.dto.TodoRequest;
+import org.onesentence.onesentence.domain.todo.dto.TodoStatusRequest;
 import org.onesentence.onesentence.domain.todo.entity.Todo;
 
 public interface TodoService {
@@ -12,4 +13,6 @@ public interface TodoService {
 	Todo findById(Long todoId);
 
 	void deleteTodo(Long todoId);
+
+	Long updateStatus(TodoStatusRequest request, Long todoId);
 }

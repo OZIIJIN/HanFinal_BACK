@@ -3,6 +3,7 @@ package org.onesentence.onesentence.domain.todo.service;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.onesentence.onesentence.domain.todo.dto.TodoRequest;
+import org.onesentence.onesentence.domain.todo.dto.TodoStatusRequest;
 import org.onesentence.onesentence.domain.todo.entity.Todo;
 import org.onesentence.onesentence.domain.todo.repository.TodoJpaRepository;
 import org.onesentence.onesentence.global.exception.ExceptionStatus;
@@ -47,5 +48,18 @@ public class TodoServiceImpl implements TodoService{
 	public void deleteTodo(Long todoId) {
 		Todo todo = findById(todoId);
 		todoJpaRepository.delete(todo);
+	}
+
+	@Override
+	@Transactional
+	public Long updateStatus(TodoStatusRequest request, Long todoId) {
+		Todo todo = findById(todoId);
+		if (request.getStatus().equals("진행중")) {
+			todo.changeToInProgress();
+		} else if (request.getStatus().equals("완료")) {
+			todo.changeToDone();
+		}
+
+		return todo.getId();
 	}
 }

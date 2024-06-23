@@ -4,6 +4,7 @@ import java.net.URI;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
 import org.onesentence.onesentence.domain.todo.dto.TodoRequest;
+import org.onesentence.onesentence.domain.todo.dto.TodoStatusRequest;
 import org.onesentence.onesentence.domain.todo.service.TodoService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +35,13 @@ public class TodoController {
 		todoService.deleteTodo(todoId);
 
 		return ResponseEntity.ok().build();
+	}
+
+	@PatchMapping("/{todoId}")
+	public ResponseEntity<String> updateStauts(@RequestBody TodoStatusRequest request, @PathVariable Long todoId) {
+		Long updatedTodoId = todoService.updateStatus(request, todoId);
+
+		return ResponseEntity.created(URI.create("/api/v1/todos/" + todoId)).build();
 	}
 
 }

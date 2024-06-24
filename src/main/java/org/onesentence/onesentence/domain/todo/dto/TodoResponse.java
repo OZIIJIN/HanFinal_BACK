@@ -27,7 +27,7 @@ public class TodoResponse {
 
 	private TodoStatus status;
 
-	public TodoResponse from(Todo todo) {
+	public static TodoResponse from(Todo todo) {
 		return new TodoResponse(
 			todo.getId(),
 			todo.getTitle(),

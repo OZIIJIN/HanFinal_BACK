@@ -1,10 +1,13 @@
 package org.onesentence.onesentence.domain.todo.controller;
 
 import java.net.URI;
+import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
 import org.onesentence.onesentence.domain.todo.dto.TodoRequest;
+import org.onesentence.onesentence.domain.todo.dto.TodoResponse;
 import org.onesentence.onesentence.domain.todo.dto.TodoStatusRequest;
+import org.onesentence.onesentence.domain.todo.entity.TodoStatus;
 import org.onesentence.onesentence.domain.todo.service.TodoService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -38,10 +41,44 @@ public class TodoController {
 	}
 
 	@PatchMapping("/{todoId}")
-	public ResponseEntity<String> updateStauts(@RequestBody TodoStatusRequest request, @PathVariable Long todoId) {
+	public ResponseEntity<String> updateStatus(@RequestBody TodoStatusRequest request, @PathVariable Long todoId) {
 		Long updatedTodoId = todoService.updateStatus(request, todoId);
 
 		return ResponseEntity.created(URI.create("/api/v1/todos/" + todoId)).build();
 	}
 
+	@GetMapping("/{todoId}")
+	public ResponseEntity<TodoResponse> getTodo(@PathVariable Long todoId) {
+		TodoResponse response = todoService.getTodo(todoId);
+
+		return ResponseEntity.ok().body(response);
+	}
+
+	@GetMapping("/statuses")
+	public ResponseEntity<List<TodoResponse>> getTodosByStatus(@RequestParam TodoStatus status) {
+		List<TodoResponse> todoResponses = todoService.getTodosByStatus(status);
+
+		return ResponseEntity.ok().body(todoResponses);
+	}
+
+	@GetMapping("/dates")
+	public ResponseEntity<List<TodoResponse>> getTodosByDate(@RequestParam LocalDate date) {
+		List<TodoResponse> todoResponses = todoService.getTodosByDate(date);
+
+		return ResponseEntity.ok().body(todoResponses);
+	}
+
+	@GetMapping("/categories/{categoryId}")
+	public ResponseEntity<List<TodoResponse>> getTodosByCategory(@PathVariable Long categoryId) {
+		List<TodoResponse> todoResponses = todoService.getTodosByCategory(categoryId);
+
+		return ResponseEntity.ok().body(todoResponses);
+	}
+
+	@GetMapping()
+	public ResponseEntity<List<TodoResponse>> getTodos() {
+		List<TodoResponse> todoResponses = todoService.getTodos();
+
+		return ResponseEntity.ok().body(todoResponses);
+	}
 }

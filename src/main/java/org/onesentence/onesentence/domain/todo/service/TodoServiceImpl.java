@@ -1,10 +1,17 @@
 package org.onesentence.onesentence.domain.todo.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.onesentence.onesentence.domain.todo.dto.TodoRequest;
+import org.onesentence.onesentence.domain.todo.dto.TodoResponse;
 import org.onesentence.onesentence.domain.todo.dto.TodoStatusRequest;
 import org.onesentence.onesentence.domain.todo.entity.Todo;
+import org.onesentence.onesentence.domain.todo.entity.TodoStatus;
 import org.onesentence.onesentence.domain.todo.repository.TodoJpaRepository;
 import org.onesentence.onesentence.global.exception.ExceptionStatus;
 import org.onesentence.onesentence.global.exception.NotFoundException;
@@ -61,5 +68,71 @@ public class TodoServiceImpl implements TodoService{
 		}
 
 		return todo.getId();
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public TodoResponse getTodo(Long todoId) {
+		Todo todo = findById(todoId);
+
+		return TodoResponse.from(todo);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<TodoResponse> getTodosByStatus(TodoStatus status) {
+		List<TodoResponse> todoResponses = new ArrayList<>();
+
+		List<Todo> todos = todoJpaRepository.findByStatus(status);
+
+		for (Todo todo : todos) {
+			todoResponses.add(TodoResponse.from(todo));
+		}
+
+		return todoResponses;
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<TodoResponse> getTodosByDate(LocalDate date) {
+		List<TodoResponse> todoResponses = new ArrayList<>();
+		LocalDateTime start = date.atStartOfDay();
+		LocalDateTime end = date.atTime(LocalTime.MAX);
+
+		List<Todo> todos = todoJpaRepository.findByDateBetween(start, end);
+
+		for (Todo todo : todos) {
+			todoResponses.add(TodoResponse.from(todo));
+		}
+
+		return todoResponses;
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<TodoResponse> getTodosByCategory(Long categoryId) {
+		List<TodoResponse> todoResponses = new ArrayList<>();
+
+		List<Todo> todos = todoJpaRepository.findByCategoryId(categoryId);
+
+		for (Todo todo : todos) {
+			todoResponses.add(TodoResponse.from(todo));
+		}
+
+		return todoResponses;
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<TodoResponse> getTodos() {
+		List<TodoResponse> todoResponses = new ArrayList<>();
+
+		List<Todo> todos = todoJpaRepository.findAll();
+
+		for (Todo todo : todos) {
+			todoResponses.add(TodoResponse.from(todo));
+		}
+
+		return todoResponses;
 	}
 }

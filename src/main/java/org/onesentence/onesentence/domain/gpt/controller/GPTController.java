@@ -5,6 +5,7 @@ import org.onesentence.onesentence.domain.gpt.dto.GPTRequest;
 import org.onesentence.onesentence.domain.gpt.dto.GPTResponse;
 import org.onesentence.onesentence.domain.gpt.service.GptService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,9 +20,9 @@ public class GPTController {
 	private final GptService gptService;
 
 	@GetMapping("/chat")
-	public String chat(@RequestParam("prompt") String prompt){
+	public ResponseEntity<String> chat(@RequestParam("prompt") String prompt){
+		String response = gptService.gptCall(prompt);
 
-		return gptService.gptCall(prompt);
-
+		return ResponseEntity.ok().body(response);
 	}
 }

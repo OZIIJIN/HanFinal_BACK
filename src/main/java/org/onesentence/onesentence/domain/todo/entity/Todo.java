@@ -1,14 +1,11 @@
 package org.onesentence.onesentence.domain.todo.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.onesentence.onesentence.domain.todo.dto.TodoRequest;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 
 @Getter
 @Entity
@@ -25,7 +22,7 @@ public class Todo {
 	private String title;
 
 	@Column
-	private LocalDateTime date;
+	private LocalDateTime todoDate;
 
 	@Column
 	private Path path;
@@ -44,7 +41,7 @@ public class Todo {
 
 	public Todo(TodoRequest request) {
 		this.title = request.getTitle();
-		this.date = request.getDate();
+		this.todoDate = request.getTodoDate();
 		this.path = request.getPath();
 		this.categoryId = request.getCategoryId();
 		this.colorId = request.getColorId();
@@ -62,7 +59,7 @@ public class Todo {
 
 	public void updateTodo(TodoRequest request) {
 		this.title = request.getTitle();
-		this.date = request.getDate();
+		this.todoDate = request.getTodoDate();
 		this.categoryId = request.getCategoryId();
 		this.colorId = request.getColorId();
 		this.due = request.getDue();

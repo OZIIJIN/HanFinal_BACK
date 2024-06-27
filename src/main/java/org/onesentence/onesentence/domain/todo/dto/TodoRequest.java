@@ -12,7 +12,7 @@ public class TodoRequest {
 
 	private String title;
 
-	private LocalDateTime date;
+	private LocalDateTime todoDate;
 
 	private Path path;
 

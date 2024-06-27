@@ -99,7 +99,7 @@ public class TodoServiceImpl implements TodoService{
 		LocalDateTime start = date.atStartOfDay();
 		LocalDateTime end = date.atTime(LocalTime.MAX);
 
-		List<Todo> todos = todoJpaRepository.findByDateBetween(start, end);
+		List<Todo> todos = todoJpaRepository.findByTodoDateBetween(start, end);
 
 		for (Todo todo : todos) {
 			todoResponses.add(TodoResponse.from(todo));

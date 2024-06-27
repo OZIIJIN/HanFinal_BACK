@@ -15,7 +15,7 @@ public class TodoResponse {
 
 	private String title;
 
-	private LocalDateTime date;
+	private LocalDateTime todoDate;
 
 	private Path path;
 
@@ -31,7 +31,7 @@ public class TodoResponse {
 		return new TodoResponse(
 			todo.getId(),
 			todo.getTitle(),
-			todo.getDate(),
+			todo.getTodoDate(),
 			todo.getPath(),
 			todo.getDue(),
 			todo.getCategoryId(),

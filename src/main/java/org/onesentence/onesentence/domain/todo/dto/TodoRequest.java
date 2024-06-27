@@ -12,13 +12,15 @@ public class TodoRequest {
 
 	private String title;
 
-	private LocalDateTime todoDate;
+	private LocalDateTime start;
 
 	private Path path;
 
-	private LocalDateTime due;
+	private LocalDateTime end;
 
 	private Long categoryId;
 
-	private Long colorId;
+	private String location;
+
+	private String together;
 }

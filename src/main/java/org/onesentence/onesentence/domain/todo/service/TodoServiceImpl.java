@@ -96,10 +96,10 @@ public class TodoServiceImpl implements TodoService{
 	@Transactional(readOnly = true)
 	public List<TodoResponse> getTodosByDate(LocalDate date) {
 		List<TodoResponse> todoResponses = new ArrayList<>();
-		LocalDateTime start = date.atStartOfDay();
-		LocalDateTime end = date.atTime(LocalTime.MAX);
+		LocalDateTime dayStart = date.atStartOfDay();
+		LocalDateTime dayEnd = date.atTime(LocalTime.MAX);
 
-		List<Todo> todos = todoJpaRepository.findByTodoDateBetween(start, end);
+		List<Todo> todos = todoJpaRepository.findByStartBetween(dayStart, dayEnd);
 
 		for (Todo todo : todos) {
 			todoResponses.add(TodoResponse.from(todo));

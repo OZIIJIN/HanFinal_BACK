@@ -15,15 +15,13 @@ public class TodoResponse {
 
 	private String title;
 
-	private LocalDateTime todoDate;
+	private LocalDateTime start;
 
 	private Path path;
 
-	private LocalDateTime due;
+	private LocalDateTime end;
 
 	private Long categoryId;
-
-	private Long colorId;
 
 	private TodoStatus status;
 
@@ -31,11 +29,10 @@ public class TodoResponse {
 		return new TodoResponse(
 			todo.getId(),
 			todo.getTitle(),
-			todo.getTodoDate(),
+			todo.getStart(),
 			todo.getPath(),
-			todo.getDue(),
+			todo.getEnd(),
 			todo.getCategoryId(),
-			todo.getColorId(),
 			todo.getStatus()
 		);
 	}

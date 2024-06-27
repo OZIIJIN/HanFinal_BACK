@@ -11,7 +11,7 @@ public interface TodoJpaRepository extends JpaRepository<Todo, Long> {
 
 	List<Todo> findByStatus(TodoStatus status);
 
-	List<Todo> findByDateBetween(LocalDateTime start, LocalDateTime end);
+	List<Todo> findByTodoDateBetween(LocalDateTime start, LocalDateTime end);
 
 	List<Todo> findByCategoryId(Long categoryId);
 

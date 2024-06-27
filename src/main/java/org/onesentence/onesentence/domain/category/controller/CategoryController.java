@@ -1,9 +1,11 @@
 package org.onesentence.onesentence.domain.category.controller;
 
 import java.net.URI;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
 import org.onesentence.onesentence.domain.category.dto.CategoryRequest;
+import org.onesentence.onesentence.domain.category.dto.CategoryResponse;
 import org.onesentence.onesentence.domain.category.service.CategoryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,5 +41,20 @@ public class CategoryController {
 		categoryService.deleteCategory(categoryId);
 
 		return ResponseEntity.ok().build();
+	}
+
+	@GetMapping()
+	public ResponseEntity<List<CategoryResponse>> getAllCategories() {
+
+		List<CategoryResponse> responses = categoryService.getAllCategories();
+
+		return ResponseEntity.ok().body(responses);
+	}
+
+	@GetMapping("/{categoryId}")
+	public ResponseEntity<CategoryResponse> getCategory(@PathVariable Long categoryId) {
+		CategoryResponse response = categoryService.getCategory(categoryId);
+
+		return ResponseEntity.ok().body(response);
 	}
 }

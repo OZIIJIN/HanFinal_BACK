@@ -13,7 +13,7 @@ public class CategoryResponse {
 
 	private String category;
 
-	public CategoryResponse from(Category category) {
+	public static CategoryResponse from(Category category) {
 		return new CategoryResponse(
 			category.getId(),
 			category.getCategory()

@@ -1,14 +1,11 @@
 package org.onesentence.onesentence.domain.todo.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.onesentence.onesentence.domain.todo.dto.TodoRequest;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 
 @Getter
 @Entity
@@ -25,31 +22,35 @@ public class Todo {
 	private String title;
 
 	@Column
-	private LocalDateTime date;
+	private LocalDateTime start;
 
 	@Column
 	private Path path;
 
 	@Column
-	private LocalDateTime due;
+	private LocalDateTime end;
 
 	@Column
 	private Long categoryId;
 
 	@Column
-	private Long colorId;
+	private TodoStatus status;
 
 	@Column
-	private TodoStatus status;
+	private String location;
+
+	@Column
+	private String together;
 
 	public Todo(TodoRequest request) {
 		this.title = request.getTitle();
-		this.date = request.getDate();
+		this.start = request.getStart();
 		this.path = request.getPath();
 		this.categoryId = request.getCategoryId();
-		this.colorId = request.getColorId();
 		this.status = TodoStatus.TODO;
-		this.due = request.getDue();
+		this.end = request.getEnd();
+		this.location = request.getLocation();
+		this.together = request.getTogether();
 	}
 
 	public void changeToInProgress() {
@@ -62,9 +63,8 @@ public class Todo {
 
 	public void updateTodo(TodoRequest request) {
 		this.title = request.getTitle();
-		this.date = request.getDate();
+		this.start = request.getStart();
 		this.categoryId = request.getCategoryId();
-		this.colorId = request.getColorId();
-		this.due = request.getDue();
+		this.end = request.getEnd();
 	}
 }

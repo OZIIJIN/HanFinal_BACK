@@ -68,9 +68,9 @@ public class TodoController {
 		return ResponseEntity.ok().body(todoResponses);
 	}
 
-	@GetMapping("/categories/{categoryId}")
-	public ResponseEntity<List<TodoResponse>> getTodosByCategory(@PathVariable Long categoryId) {
-		List<TodoResponse> todoResponses = todoService.getTodosByCategory(categoryId);
+	@GetMapping("/categories/{category}")
+	public ResponseEntity<List<TodoResponse>> getTodosByCategory(@PathVariable String category) {
+		List<TodoResponse> todoResponses = todoService.getTodosByCategory(category);
 
 		return ResponseEntity.ok().body(todoResponses);
 	}

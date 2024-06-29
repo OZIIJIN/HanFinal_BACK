@@ -17,23 +17,26 @@ public class TodoResponse {
 
 	private LocalDateTime start;
 
-	private Path path;
-
 	private LocalDateTime end;
 
-	private Long categoryId;
+	private String category;
 
 	private TodoStatus status;
+
+	private String location;
+
+	private String together;
 
 	public static TodoResponse from(Todo todo) {
 		return new TodoResponse(
 			todo.getId(),
 			todo.getTitle(),
 			todo.getStart(),
-			todo.getPath(),
 			todo.getEnd(),
-			todo.getCategoryId(),
-			todo.getStatus()
+			todo.getCategory(),
+			todo.getStatus(),
+			todo.getLocation(),
+			todo.getTogether()
 		);
 	}
 }

@@ -110,10 +110,10 @@ public class TodoServiceImpl implements TodoService{
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<TodoResponse> getTodosByCategory(Long categoryId) {
+	public List<TodoResponse> getTodosByCategory(String category) {
 		List<TodoResponse> todoResponses = new ArrayList<>();
 
-		List<Todo> todos = todoJpaRepository.findByCategoryId(categoryId);
+		List<Todo> todos = todoJpaRepository.findByCategory(category);
 
 		for (Todo todo : todos) {
 			todoResponses.add(TodoResponse.from(todo));

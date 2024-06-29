@@ -26,7 +26,7 @@ public interface TodoService {
 
 	List<TodoResponse> getTodosByDate(LocalDate date);
 
-	List<TodoResponse> getTodosByCategory(Long categoryId);
+	List<TodoResponse> getTodosByCategory(String category);
 
 	List<TodoResponse> getTodos();
 }

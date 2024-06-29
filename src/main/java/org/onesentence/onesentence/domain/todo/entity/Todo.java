@@ -25,13 +25,10 @@ public class Todo {
 	private LocalDateTime start;
 
 	@Column
-	private Path path;
-
-	@Column
 	private LocalDateTime end;
 
 	@Column
-	private Long categoryId;
+	private String category;
 
 	@Column
 	private TodoStatus status;
@@ -45,9 +42,8 @@ public class Todo {
 	public Todo(TodoRequest request) {
 		this.title = request.getTitle();
 		this.start = request.getStart();
-		this.path = request.getPath();
-		this.categoryId = request.getCategoryId();
-		this.status = TodoStatus.TODO;
+		this.category = request.getCategory();
+		this.status = request.getStatus();
 		this.end = request.getEnd();
 		this.location = request.getLocation();
 		this.together = request.getTogether();
@@ -64,7 +60,19 @@ public class Todo {
 	public void updateTodo(TodoRequest request) {
 		this.title = request.getTitle();
 		this.start = request.getStart();
-		this.categoryId = request.getCategoryId();
+		this.category = request.getCategory();
 		this.end = request.getEnd();
+		this.location = request.getLocation();
+		this.together = request.getTogether();
+	}
+
+	public TodoStatus setStatus(String status) {
+		if(status.equals("TODO")) {
+			return TodoStatus.TODO;
+		} else if (status.equals("IN_PROGRESS")) {
+			return TodoStatus.IN_PROGRESS;
+		} else {
+			return TodoStatus.DONE;
+		}
 	}
 }

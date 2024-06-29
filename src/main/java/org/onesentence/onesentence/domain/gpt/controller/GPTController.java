@@ -1,6 +1,8 @@
 package org.onesentence.onesentence.domain.gpt.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
+import org.onesentence.onesentence.domain.gpt.dto.GPTCallTodoResponse;
 import org.onesentence.onesentence.domain.gpt.dto.GPTRequest;
 import org.onesentence.onesentence.domain.gpt.dto.GPTResponse;
 import org.onesentence.onesentence.domain.gpt.service.GptService;
@@ -20,8 +22,9 @@ public class GPTController {
 	private final GptService gptService;
 
 	@GetMapping("/chat")
-	public ResponseEntity<String> chat(@RequestParam("prompt") String prompt){
-		String response = gptService.gptCall(prompt);
+	public ResponseEntity<GPTCallTodoResponse> chat(@RequestParam("prompt") String prompt)
+		throws JsonProcessingException {
+		GPTCallTodoResponse response = gptService.gptCall(prompt);
 
 		return ResponseEntity.ok().body(response);
 	}

@@ -31,6 +31,7 @@ public class Todo {
 	private String category;
 
 	@Column
+	@Enumerated(EnumType.STRING)
 	private TodoStatus status;
 
 	@Column

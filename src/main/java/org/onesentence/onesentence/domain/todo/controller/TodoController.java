@@ -4,9 +4,7 @@ import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.onesentence.onesentence.domain.todo.dto.TodoRequest;
-import org.onesentence.onesentence.domain.todo.dto.TodoResponse;
-import org.onesentence.onesentence.domain.todo.dto.TodoStatusRequest;
+import org.onesentence.onesentence.domain.todo.dto.*;
 import org.onesentence.onesentence.domain.todo.entity.TodoStatus;
 import org.onesentence.onesentence.domain.todo.service.TodoService;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +25,8 @@ public class TodoController {
 	}
 
 	@PutMapping("/{todoId}")
-	public ResponseEntity<String> updateTodo(@RequestBody TodoRequest request, @PathVariable Long todoId) {
+	public ResponseEntity<String> updateTodo(@RequestBody TodoRequest request,
+		@PathVariable Long todoId) {
 		Long updatedTodoId = todoService.updateTodo(request, todoId);
 
 		return ResponseEntity.created(URI.create("/api/v1/todos/" + todoId)).build();
@@ -40,8 +39,17 @@ public class TodoController {
 		return ResponseEntity.ok().build();
 	}
 
+	@PatchMapping("/{todoId}")
+	public ResponseEntity<String> setInputTime(@PathVariable Long todoId,
+		@RequestBody TodoInputTimeRequest request) {
+		Long updatedTodoId = todoService.setInputTime(todoId, request);
+
+		return ResponseEntity.created(URI.create("/api/v1/todos/" + todoId)).build();
+	}
+
 	@PatchMapping("/{todoId}/status-updates")
-	public ResponseEntity<String> updateStatus(@RequestBody TodoStatusRequest request, @PathVariable Long todoId) {
+	public ResponseEntity<String> updateStatus(@RequestBody TodoStatusRequest request,
+		@PathVariable Long todoId) {
 		Long updatedTodoId = todoService.updateStatus(request, todoId);
 
 		return ResponseEntity.created(URI.create("/api/v1/todos/" + todoId)).build();
@@ -80,5 +88,12 @@ public class TodoController {
 		List<TodoResponse> todoResponses = todoService.getTodos();
 
 		return ResponseEntity.ok().body(todoResponses);
+	}
+
+	@GetMapping("/priorities")
+	public ResponseEntity<List<TodoPriority>> getPriorities() {
+		List<TodoPriority> priorities = todoService.getPriorities();
+
+		return ResponseEntity.ok().body(priorities);
 	}
 }

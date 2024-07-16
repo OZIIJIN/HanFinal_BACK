@@ -7,12 +7,13 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.onesentence.onesentence.domain.todo.dto.TodoRequest;
-import org.onesentence.onesentence.domain.todo.dto.TodoResponse;
-import org.onesentence.onesentence.domain.todo.dto.TodoStatusRequest;
+import org.onesentence.onesentence.domain.gpt.dto.GPTCallTodoRequest;
+import org.onesentence.onesentence.domain.todo.dto.*;
 import org.onesentence.onesentence.domain.todo.entity.Todo;
 import org.onesentence.onesentence.domain.todo.entity.TodoStatus;
 import org.onesentence.onesentence.domain.todo.repository.TodoJpaRepository;
+import org.onesentence.onesentence.domain.todo.repository.TodoQuery;
+import org.onesentence.onesentence.domain.todo.repository.TodoQueryImpl;
 import org.onesentence.onesentence.global.exception.ExceptionStatus;
 import org.onesentence.onesentence.global.exception.NotFoundException;
 import org.springframework.stereotype.Service;
@@ -23,12 +24,21 @@ import org.springframework.transaction.annotation.Transactional;
 public class TodoServiceImpl implements TodoService{
 
 	private final TodoJpaRepository todoJpaRepository;
+	private final TodoQuery todoQuery;
 
 	@Override
 	@Transactional
 	public Long createTodo(TodoRequest request) {
 
-		Todo todo = new Todo(request);
+		Todo todo = new Todo(
+			request.getTitle(),
+			request.getStart(),
+			request.getCategory(),
+			request.getStatus(),
+			request.getEnd(),
+			request.getLocation(),
+			request.getTogether(),
+			request.getInputTime());
 		Todo savedTodo = todoJpaRepository.save(todo);
 
 		return savedTodo.getId();
@@ -44,7 +54,6 @@ public class TodoServiceImpl implements TodoService{
 		return todo.getId();
 	}
 
-	@Override
 	public Todo findById(Long todoId) {
 		return todoJpaRepository.findById(todoId).orElseThrow(() -> new NotFoundException(
 			ExceptionStatus.NOT_FOUND));
@@ -134,5 +143,38 @@ public class TodoServiceImpl implements TodoService{
 		}
 
 		return todoResponses;
+	}
+
+	@Override
+	public List<TodoPriority> getPriorities() {
+		return todoQuery.calculatePriority();
+	}
+
+	@Override
+	@Transactional
+	public Long createTodoByOneSentence(GPTCallTodoRequest gptCallTodoRequest) {
+
+		Todo todo = Todo.builder()
+			.title(gptCallTodoRequest.getTitle())
+			.start(gptCallTodoRequest.getStart())
+			.category(gptCallTodoRequest.getCategory())
+			.status(TodoStatus.TODO)
+			.end(gptCallTodoRequest.getEnd())
+			.location(gptCallTodoRequest.getLocation())
+			.together(gptCallTodoRequest.getTogether())
+			.build();
+		Todo savedTodo = todoJpaRepository.save(todo);
+
+		return savedTodo.getId();
+	}
+
+	@Override
+	@Transactional
+	public Long setInputTime(Long todoId, TodoInputTimeRequest request) {
+
+		Todo todo = findById(todoId);
+		todo.setInputTime(request.getInputTime());
+
+		return todo.getId();
 	}
 }

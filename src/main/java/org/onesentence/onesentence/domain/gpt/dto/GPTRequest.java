@@ -19,7 +19,7 @@ public class GPTRequest {
 	private int frequencyPenalty;
 	private int presencePenalty;
 
-	public GPTRequest(String model, String prompt, int temperature, int maxTokens, int topP,
+	public GPTRequest(String model, int temperature, int maxTokens, int topP,
 		int frequencyPenalty, int presencePenalty, List<Message> messages) {
 		this.model = model;
 		this.messages = messages;

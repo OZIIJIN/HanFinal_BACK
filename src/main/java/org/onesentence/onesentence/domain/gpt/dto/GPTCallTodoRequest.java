@@ -4,12 +4,11 @@ import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.onesentence.onesentence.domain.todo.entity.TodoStatus;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class GPTCallTodoResponse {
+public class GPTCallTodoRequest {
 
 	private String title;
 

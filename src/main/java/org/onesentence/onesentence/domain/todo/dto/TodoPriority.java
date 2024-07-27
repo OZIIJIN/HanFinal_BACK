@@ -12,11 +12,5 @@ public class TodoPriority {
 
 	Long todoId;
 
-	Double urgency;
-
-	Double importance;
-
-	Integer progressTime;
-
 	Double priorityScore;
 }

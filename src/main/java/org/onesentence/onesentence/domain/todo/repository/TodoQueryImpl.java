@@ -40,12 +40,11 @@ public class TodoQueryImpl implements TodoQuery {
 		return jpaQueryFactory
 			.select(Projections.constructor(TodoPriority.class,
 				todo.id.as("todoId"),
-				urgency,
-				importance,
-				progressTime,
 				priorityScore))
 			.from(todo)
-			.where(todo.status.eq(TodoStatus.TODO).or(todo.status.eq(TodoStatus.IN_PROGRESS)))
+			.where(todo.status.eq(TodoStatus.TODO)
+				.or(todo.status.eq(TodoStatus.IN_PROGRESS))
+				.and(todo.together.isNull()))
 			.fetch();
 	}
 }

@@ -5,8 +5,14 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.onesentence.onesentence.domain.dijkstra.model.Graph;
+import org.onesentence.onesentence.domain.dijkstra.model.Node;
+import org.onesentence.onesentence.domain.dijkstra.service.DijkstraService;
 import org.onesentence.onesentence.domain.gpt.dto.GPTCallTodoRequest;
 import org.onesentence.onesentence.domain.todo.dto.*;
 import org.onesentence.onesentence.domain.todo.entity.Todo;
@@ -16,15 +22,21 @@ import org.onesentence.onesentence.domain.todo.repository.TodoQuery;
 import org.onesentence.onesentence.domain.todo.repository.TodoQueryImpl;
 import org.onesentence.onesentence.global.exception.ExceptionStatus;
 import org.onesentence.onesentence.global.exception.NotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TodoServiceImpl implements TodoService{
 
 	private final TodoJpaRepository todoJpaRepository;
 	private final TodoQuery todoQuery;
+	private final DijkstraService dijkstraService;
+	private final Logger logger = LoggerFactory.getLogger(TodoServiceImpl.class);
+
 
 	@Override
 	@Transactional
@@ -145,10 +157,46 @@ public class TodoServiceImpl implements TodoService{
 		return todoResponses;
 	}
 
+	@Transactional(readOnly = true)
 	@Override
-	public List<TodoPriority> getPriorities() {
-		return todoQuery.calculatePriority();
+	public List<TodoResponse> getPriorities() {
+		List<TodoPriority> todoPriorities = todoQuery.calculatePriority();
+
+		List<Node> nodes = new ArrayList<>();
+
+		for(TodoPriority todoPriority : todoPriorities) {
+			nodes.add(new Node(todoPriority.getTodoId(), todoPriority.getPriorityScore()));
+		}
+		Graph graph = new Graph(nodes);
+
+		for (Node node : nodes) {
+			for (Node neighbor : nodes) {
+				if (!node.getTodoId().equals(neighbor.getTodoId())) {
+					double weight = 1.0 / (neighbor.getPriorityScore() + 1.0); // 역수 가중치 계산
+					graph.addEdge(node.getTodoId(), neighbor.getTodoId(), weight);
+				}
+			}
+		}
+
+		List<Long> optimalOrder = dijkstraService.getOptimalOrder(graph);
+		logger.info("Optimal Order: {}", optimalOrder);
+
+		List<Todo> todos = todoQuery.getTodosByOptimalOrder(optimalOrder);
+
+		Map<Long, Todo> todoMap = todos.stream()
+			.collect(Collectors.toMap(Todo::getId, todo -> todo));
+
+		List<TodoResponse> todoResponses = new ArrayList<>();
+		for (Long todoId : optimalOrder) {
+			Todo todo = todoMap.get(todoId);
+			if (todo != null) {
+				TodoResponse todoResponse = TodoResponse.from(todo);
+				todoResponses.add(todoResponse);
+			}
+		}
+		return todoResponses;
 	}
+
 
 	@Override
 	@Transactional

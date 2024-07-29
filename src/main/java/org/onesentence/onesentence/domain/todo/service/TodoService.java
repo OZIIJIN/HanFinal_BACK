@@ -27,7 +27,7 @@ public interface TodoService {
 
 	List<TodoResponse> getTodos();
 
-	List<TodoPriority> getPriorities();
+	List<TodoResponse> getPriorities();
 
 	Long createTodoByOneSentence(GPTCallTodoRequest gptCallTodoRequest);
 

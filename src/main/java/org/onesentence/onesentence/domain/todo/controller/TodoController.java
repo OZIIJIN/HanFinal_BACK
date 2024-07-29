@@ -91,8 +91,8 @@ public class TodoController {
 	}
 
 	@GetMapping("/priorities")
-	public ResponseEntity<List<TodoPriority>> getPriorities() {
-		List<TodoPriority> priorities = todoService.getPriorities();
+	public ResponseEntity<List<TodoResponse>> getPriorities() {
+		List<TodoResponse> priorities = todoService.getPriorities();
 
 		return ResponseEntity.ok().body(priorities);
 	}

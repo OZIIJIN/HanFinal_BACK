@@ -8,7 +8,9 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.onesentence.onesentence.domain.todo.dto.TodoPriority;
+import org.onesentence.onesentence.domain.todo.dto.TodoResponse;
 import org.onesentence.onesentence.domain.todo.entity.QTodo;
+import org.onesentence.onesentence.domain.todo.entity.Todo;
 import org.onesentence.onesentence.domain.todo.entity.TodoStatus;
 import org.springframework.stereotype.Repository;
 
@@ -47,4 +49,15 @@ public class TodoQueryImpl implements TodoQuery {
 				.and(todo.together.isNull()))
 			.fetch();
 	}
+
+	@Override
+	public List<Todo> getTodosByOptimalOrder(List<Long> optimalOrder) {
+		QTodo todo = QTodo.todo;
+
+		return jpaQueryFactory
+			.selectFrom(todo)
+			.where(todo.id.in(optimalOrder))
+			.fetch();
+	}
+
 }

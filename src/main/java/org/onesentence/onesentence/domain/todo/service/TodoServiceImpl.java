@@ -42,15 +42,7 @@ public class TodoServiceImpl implements TodoService{
 	@Transactional
 	public Long createTodo(TodoRequest request) {
 
-		Todo todo = new Todo(
-			request.getTitle(),
-			request.getStart(),
-			request.getCategory(),
-			request.getStatus(),
-			request.getEnd(),
-			request.getLocation(),
-			request.getTogether(),
-			request.getInputTime());
+		Todo todo = new Todo(request);
 		Todo savedTodo = todoJpaRepository.save(todo);
 
 		return savedTodo.getId();

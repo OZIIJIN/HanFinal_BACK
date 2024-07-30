@@ -15,9 +15,25 @@ public class TodoRequest {
 
 	private String title;
 
-	private LocalDateTime start;
+	private int startYear;
 
-	private LocalDateTime end;
+	private int startMonth;
+
+	private int startDay;
+
+	private int startHour;
+
+	private int startMinute;
+
+	private int endYear;
+
+	private int endMonth;
+
+	private int endDay;
+
+	private int endHour;
+
+	private int endMinute;
 
 	private String category;
 
@@ -27,5 +43,5 @@ public class TodoRequest {
 
 	private String together;
 
-	private Integer inputTime;
+	private int inputTime;
 }

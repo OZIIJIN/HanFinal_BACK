@@ -1,6 +1,5 @@
 package org.onesentence.onesentence.domain.todo.repository;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.onesentence.onesentence.domain.todo.entity.Todo;

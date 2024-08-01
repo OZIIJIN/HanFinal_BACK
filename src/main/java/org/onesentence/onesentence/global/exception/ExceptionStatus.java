@@ -8,7 +8,8 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum ExceptionStatus {
 
-	NOT_FOUND(HttpStatus.BAD_REQUEST.value(), "존재하지 않습니다.");
+	NOT_FOUND(HttpStatus.BAD_REQUEST.value(), "존재하지 않습니다."),
+	DUPLICATED_NICKNAME(HttpStatus.BAD_REQUEST.value(), "중복되는 닉네임입니다.");
 
 	private final Integer statusCode;
 	private final String message;

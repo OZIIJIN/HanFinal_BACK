@@ -1,4 +1,4 @@
-package org.onesentence.onesentence.domain.gpt.config;
+package org.onesentence.onesentence.global.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;

@@ -45,7 +45,6 @@ public class Todo {
 	@Column
 	private Integer inputTime;
 
-	@Builder
 	public Todo(TodoRequest request) {
 		this.title = request.getTitle();
 		this.start = LocalDateTime.of(request.getStartYear(), request.getStartMonth(),

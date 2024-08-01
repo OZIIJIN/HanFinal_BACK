@@ -3,8 +3,10 @@ package org.onesentence.onesentence.domain.todo.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.onesentence.onesentence.domain.gpt.dto.GPTCallTodoRequest;
-import org.onesentence.onesentence.domain.todo.dto.*;
-import org.onesentence.onesentence.domain.todo.entity.Todo;
+import org.onesentence.onesentence.domain.todo.dto.TodoInputTimeRequest;
+import org.onesentence.onesentence.domain.todo.dto.TodoRequest;
+import org.onesentence.onesentence.domain.todo.dto.TodoResponse;
+import org.onesentence.onesentence.domain.todo.dto.TodoStatusRequest;
 import org.onesentence.onesentence.domain.todo.entity.TodoStatus;
 
 public interface TodoService {

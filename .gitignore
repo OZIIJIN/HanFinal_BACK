@@ -38,3 +38,6 @@ out/
 
 ### apiKey ###
 application.properties
+
+### firebase dev key ###
+onesentence-dev-firebase-key.json

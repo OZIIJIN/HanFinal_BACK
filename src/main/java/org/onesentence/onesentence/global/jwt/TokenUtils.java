@@ -24,7 +24,7 @@ public class TokenUtils {
 			.setSubject(user.getNickName())
 			.setHeader(createHeader())
 			.setClaims(createClaims(user))
-			.setExpiration(createExpireDate(1000 * 60 * 5))
+			.setExpiration(createExpireDate(1000 * 60 * 60 * 12)) // 12시간
 			.signWith(SignatureAlgorithm.HS256, createSigningKey(SECRET_KEY))
 			.compact();
 	}
@@ -34,7 +34,7 @@ public class TokenUtils {
 			.setSubject(user.getNickName())
 			.setHeader(createHeader())
 			.setClaims(createClaims(user))
-			.setExpiration(createExpireDate(1000 * 60 * 10))
+			.setExpiration(createExpireDate(1000 * 60 * 60 * 24 * 7 * 2)) // 2주
 			.signWith(SignatureAlgorithm.HS256, createSigningKey(REFRESH_KEY))
 			.compact();
 	}

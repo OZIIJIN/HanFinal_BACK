@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserRequestDto {
+public class UserSignUpRequestDto {
 
 	private String nickName;
 

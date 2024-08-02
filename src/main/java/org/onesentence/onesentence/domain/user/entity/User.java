@@ -2,12 +2,14 @@ package org.onesentence.onesentence.domain.user.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.onesentence.onesentence.domain.user.dto.UserRequestDto;
+import org.onesentence.onesentence.domain.user.dto.UserSignUpRequestDto;
 
 @Entity
 @Getter
+@Builder
 @Table(name = "user")
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,9 +25,8 @@ public class User {
 	@Column
 	private String fcmToken;
 
-	public User(UserRequestDto userRequestDto) {
-		this.nickName = userRequestDto.getNickName();
-		this.fcmToken = userRequestDto.getFcmToken();
+	public User(UserSignUpRequestDto userSignUpRequestDto) {
+		this.nickName = userSignUpRequestDto.getNickName();
+		this.fcmToken = userSignUpRequestDto.getFcmToken();
 	}
-
 }

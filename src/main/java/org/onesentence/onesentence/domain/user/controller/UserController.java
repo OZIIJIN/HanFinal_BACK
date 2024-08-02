@@ -1,16 +1,14 @@
 package org.onesentence.onesentence.domain.user.controller;
 
 import java.net.URI;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.onesentence.onesentence.domain.todo.dto.TodoRequest;
-import org.onesentence.onesentence.domain.user.dto.UserRequestDto;
-import org.onesentence.onesentence.domain.user.dto.UserResponseDto;
+import org.onesentence.onesentence.domain.user.dto.TokenResponseDto;
+import org.onesentence.onesentence.domain.user.dto.UserLoginRequestDto;
+import org.onesentence.onesentence.domain.user.dto.UserSignUpRequestDto;
 import org.onesentence.onesentence.domain.user.service.UserService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,11 +17,17 @@ public class UserController {
 
 	private final UserService userService;
 
-	@PostMapping("/signUp")
-	public ResponseEntity<String> signUp(@RequestBody UserRequestDto request) {
-		Long userId = userService.signUp(request);
+	@PostMapping("/sign-up")
+	public ResponseEntity<TokenResponseDto> signUp(@RequestBody UserSignUpRequestDto request) {
+		TokenResponseDto responseDto = userService.signUp(request);
 
-		return ResponseEntity.created(URI.create("/api/v1/users/" + userId)).build();
+		return ResponseEntity.ok(responseDto);
+	}
+
+	@PostMapping("/log-in")
+	public ResponseEntity<TokenResponseDto> login(@RequestBody UserLoginRequestDto loginRequestDto) {
+		TokenResponseDto responseDto = userService.login(loginRequestDto);
+		return ResponseEntity.ok(responseDto);
 	}
 
 }

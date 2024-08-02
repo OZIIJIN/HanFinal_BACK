@@ -16,10 +16,11 @@ public class TextController {
 	private final TextService textService;
 
 	@PostMapping
-	public ResponseEntity<String> createText(@RequestBody TextRequest request)
+	public ResponseEntity<String> createText(@RequestBody TextRequest request,
+		@RequestAttribute("userId") Long userId)
 		throws JsonProcessingException {
 
-		Long todoId = textService.createTodoByOneSentence(request);
+		Long todoId = textService.createTodoByOneSentence(request, userId);
 
 		return ResponseEntity.created(URI.create("/api/v1/todos/" + todoId)).build();
 	}

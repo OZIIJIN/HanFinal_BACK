@@ -20,6 +20,8 @@ import org.onesentence.onesentence.domain.todo.entity.TodoStatus;
 import org.onesentence.onesentence.domain.todo.repository.TodoJpaRepository;
 import org.onesentence.onesentence.domain.todo.repository.TodoQuery;
 import org.onesentence.onesentence.domain.todo.repository.TodoQueryImpl;
+import org.onesentence.onesentence.domain.user.entity.User;
+import org.onesentence.onesentence.domain.user.repository.UserJpaRepository;
 import org.onesentence.onesentence.global.exception.ExceptionStatus;
 import org.onesentence.onesentence.global.exception.NotFoundException;
 import org.slf4j.Logger;
@@ -35,14 +37,21 @@ public class TodoServiceImpl implements TodoService{
 	private final TodoJpaRepository todoJpaRepository;
 	private final TodoQuery todoQuery;
 	private final DijkstraService dijkstraService;
-	private final Logger logger = LoggerFactory.getLogger(TodoServiceImpl.class);
+	private final UserJpaRepository userJpaRepository;
 
+	private User checkUserByUserId (Long userId) {
+		return userJpaRepository.findById(userId)
+			.orElseThrow(() -> new NotFoundException(ExceptionStatus.NOT_FOUND));
+	}
 
 	@Override
 	@Transactional
-	public Long createTodo(TodoRequest request) {
+	public Long createTodo(TodoRequest request, Long userId) {
 
-		Todo todo = new Todo(request);
+		User user = checkUserByUserId(userId);
+
+		Todo todo = new Todo(request, user.getId());
+
 		Todo savedTodo = todoJpaRepository.save(todo);
 
 		return savedTodo.getId();
@@ -50,9 +59,15 @@ public class TodoServiceImpl implements TodoService{
 
 	@Override
 	@Transactional
-	public Long updateTodo(TodoRequest request, Long todoId) {
+	public Long updateTodo(TodoRequest request, Long todoId, Long userId) {
 
+		User user = checkUserByUserId(userId);
 		Todo todo = findById(todoId);
+
+		if(!todo.getUserId().equals(user.getId())) {
+			throw new IllegalArgumentException("TODO 작성자가 아닙니다.");
+		}
+
 		todo.updateTodo(request);
 
 		return todo.getId();
@@ -65,8 +80,15 @@ public class TodoServiceImpl implements TodoService{
 
 	@Override
 	@Transactional
-	public void deleteTodo(Long todoId) {
+	public void deleteTodo(Long todoId, Long userId) {
+
+		User user = checkUserByUserId(userId);
 		Todo todo = findById(todoId);
+
+		if(!todo.getUserId().equals(user.getId())) {
+			throw new IllegalArgumentException("TODO 작성자가 아닙니다.");
+		}
+
 		todoJpaRepository.delete(todo);
 	}
 
@@ -93,10 +115,10 @@ public class TodoServiceImpl implements TodoService{
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<TodoResponse> getTodosByStatus(TodoStatus status) {
+	public List<TodoResponse> getTodosByStatus(TodoStatus status, Long userId) {
 		List<TodoResponse> todoResponses = new ArrayList<>();
 
-		List<Todo> todos = todoJpaRepository.findByStatus(status);
+		List<Todo> todos = todoQuery.findByStatus(status, userId);
 
 		for (Todo todo : todos) {
 			todoResponses.add(TodoResponse.from(todo));
@@ -107,12 +129,10 @@ public class TodoServiceImpl implements TodoService{
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<TodoResponse> getTodosByDate(LocalDate date) {
+	public List<TodoResponse> getTodosByDate(LocalDate date, Long userId) {
 		List<TodoResponse> todoResponses = new ArrayList<>();
-		LocalDateTime dayStart = date.atStartOfDay();
-		LocalDateTime dayEnd = date.atTime(LocalTime.MAX);
 
-		List<Todo> todos = todoJpaRepository.findByStartBetween(dayStart, dayEnd);
+		List<Todo> todos = todoQuery.findByDate(date, userId);
 
 		for (Todo todo : todos) {
 			todoResponses.add(TodoResponse.from(todo));
@@ -123,10 +143,10 @@ public class TodoServiceImpl implements TodoService{
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<TodoResponse> getTodosByCategory(String category) {
+	public List<TodoResponse> getTodosByCategory(String category, Long userId) {
 		List<TodoResponse> todoResponses = new ArrayList<>();
 
-		List<Todo> todos = todoJpaRepository.findByCategory(category);
+		List<Todo> todos = todoQuery.findByCategory(category, userId);
 
 		for (Todo todo : todos) {
 			todoResponses.add(TodoResponse.from(todo));
@@ -137,10 +157,10 @@ public class TodoServiceImpl implements TodoService{
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<TodoResponse> getTodos() {
+	public List<TodoResponse> getTodos(Long userId) {
 		List<TodoResponse> todoResponses = new ArrayList<>();
 
-		List<Todo> todos = todoJpaRepository.findAll();
+		List<Todo> todos = todoQuery.findAll(userId);
 
 		for (Todo todo : todos) {
 			todoResponses.add(TodoResponse.from(todo));
@@ -151,8 +171,8 @@ public class TodoServiceImpl implements TodoService{
 
 	@Transactional(readOnly = true)
 	@Override
-	public List<TodoResponse> getPriorities() {
-		List<TodoPriority> todoPriorities = todoQuery.calculatePriority();
+	public List<TodoResponse> getPriorities(Long userId) {
+		List<TodoPriority> todoPriorities = todoQuery.calculatePriority(userId);
 
 		List<Node> nodes = new ArrayList<>();
 
@@ -171,7 +191,7 @@ public class TodoServiceImpl implements TodoService{
 		}
 
 		List<Long> optimalOrder = dijkstraService.getOptimalOrder(graph);
-		logger.info("Optimal Order: {}", optimalOrder);
+		log.info("Optimal Order: {}", optimalOrder);
 
 		List<Todo> todos = todoQuery.getTodosByOptimalOrder(optimalOrder);
 
@@ -192,7 +212,7 @@ public class TodoServiceImpl implements TodoService{
 
 	@Override
 	@Transactional
-	public Long createTodoByOneSentence(GPTCallTodoRequest gptCallTodoRequest) {
+	public Long createTodoByOneSentence(GPTCallTodoRequest gptCallTodoRequest, Long userId) {
 
 		Todo todo = Todo.builder()
 			.title(gptCallTodoRequest.getTitle())
@@ -202,6 +222,7 @@ public class TodoServiceImpl implements TodoService{
 			.end(gptCallTodoRequest.getEnd())
 			.location(gptCallTodoRequest.getLocation())
 			.together(gptCallTodoRequest.getTogether())
+			.userId(userId)
 			.build();
 		Todo savedTodo = todoJpaRepository.save(todo);
 
@@ -210,9 +231,15 @@ public class TodoServiceImpl implements TodoService{
 
 	@Override
 	@Transactional
-	public Long setInputTime(Long todoId, TodoInputTimeRequest request) {
+	public Long setInputTime(Long todoId, TodoInputTimeRequest request, Long userId) {
 
+		User user = checkUserByUserId(userId);
 		Todo todo = findById(todoId);
+
+		if(!todo.getUserId().equals(user.getId())) {
+			throw new IllegalArgumentException("TODO 작성자가 아닙니다.");
+		}
+
 		todo.setInputTime(request.getInputTime());
 
 		return todo.getId();

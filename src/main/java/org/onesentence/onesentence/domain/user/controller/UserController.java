@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.onesentence.onesentence.domain.user.dto.TokenResponseDto;
 import org.onesentence.onesentence.domain.user.dto.UserLoginRequestDto;
+import org.onesentence.onesentence.domain.user.dto.UserResponseDto;
 import org.onesentence.onesentence.domain.user.dto.UserSignUpRequestDto;
 import org.onesentence.onesentence.domain.user.service.UserService;
 import org.springframework.http.ResponseEntity;
@@ -18,15 +19,9 @@ public class UserController {
 	private final UserService userService;
 
 	@PostMapping("/sign-up")
-	public ResponseEntity<TokenResponseDto> signUp(@RequestBody UserSignUpRequestDto request) {
-		TokenResponseDto responseDto = userService.signUp(request);
+	public ResponseEntity<UserResponseDto> signUp(@RequestBody UserSignUpRequestDto request) {
+		UserResponseDto responseDto = userService.signUp(request);
 
-		return ResponseEntity.ok(responseDto);
-	}
-
-	@PostMapping("/log-in")
-	public ResponseEntity<TokenResponseDto> login(@RequestBody UserLoginRequestDto loginRequestDto) {
-		TokenResponseDto responseDto = userService.login(loginRequestDto);
 		return ResponseEntity.ok(responseDto);
 	}
 

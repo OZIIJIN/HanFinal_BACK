@@ -11,27 +11,27 @@ import org.onesentence.onesentence.domain.todo.entity.TodoStatus;
 
 public interface TodoService {
 
-	Long createTodo(TodoRequest request);
+	Long createTodo(TodoRequest request, Long userId);
 
-	Long updateTodo(TodoRequest request, Long todoId);
+	Long updateTodo(TodoRequest request, Long todoId, Long userId);
 
-	void deleteTodo(Long todoId);
+	void deleteTodo(Long todoId, Long userId);
 
 	Long updateStatus(TodoStatusRequest request, Long todoId);
 
 	TodoResponse getTodo(Long todoId);
 
-	List<TodoResponse> getTodosByStatus(TodoStatus status);
+	List<TodoResponse> getTodosByStatus(TodoStatus status, Long userId);
 
-	List<TodoResponse> getTodosByDate(LocalDate date);
+	List<TodoResponse> getTodosByDate(LocalDate date, Long userId);
 
-	List<TodoResponse> getTodosByCategory(String category);
+	List<TodoResponse> getTodosByCategory(String category, Long userId);
 
-	List<TodoResponse> getTodos();
+	List<TodoResponse> getTodos(Long userId);
 
-	List<TodoResponse> getPriorities();
+	List<TodoResponse> getPriorities(Long userId);
 
-	Long createTodoByOneSentence(GPTCallTodoRequest gptCallTodoRequest);
+	Long createTodoByOneSentence(GPTCallTodoRequest gptCallTodoRequest, Long userId);
 
-	Long setInputTime(Long todoId, TodoInputTimeRequest request);
+	Long setInputTime(Long todoId, TodoInputTimeRequest request, Long userId);
 }

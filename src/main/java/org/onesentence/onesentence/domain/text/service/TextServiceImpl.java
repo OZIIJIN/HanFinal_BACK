@@ -19,11 +19,11 @@ public class TextServiceImpl implements TextService {
 	private final TodoServiceImpl todoService;
 
 	@Override
-	public Long createTodoByOneSentence(TextRequest request) throws JsonProcessingException {
+	public Long createTodoByOneSentence(TextRequest request, Long userId) throws JsonProcessingException {
 		String text = request.getText();
 
 		GPTCallTodoRequest gptCallTodoRequest = gptService.gptCall(text);
 
-		return todoService.createTodoByOneSentence(gptCallTodoRequest);
+		return todoService.createTodoByOneSentence(gptCallTodoRequest, userId);
 	}
 }

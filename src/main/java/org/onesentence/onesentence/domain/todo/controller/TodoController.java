@@ -4,7 +4,10 @@ import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.onesentence.onesentence.domain.todo.dto.*;
+import org.onesentence.onesentence.domain.todo.dto.TodoInputTimeRequest;
+import org.onesentence.onesentence.domain.todo.dto.TodoRequest;
+import org.onesentence.onesentence.domain.todo.dto.TodoResponse;
+import org.onesentence.onesentence.domain.todo.dto.TodoStatusRequest;
 import org.onesentence.onesentence.domain.todo.entity.TodoStatus;
 import org.onesentence.onesentence.domain.todo.service.TodoService;
 import org.springframework.http.ResponseEntity;
@@ -18,35 +21,39 @@ public class TodoController {
 	private final TodoService todoService;
 
 	@PostMapping
-	public ResponseEntity<String> createTodo(@RequestBody TodoRequest request) {
-		Long todoId = todoService.createTodo(request);
+	public ResponseEntity<String> createTodo(@RequestBody TodoRequest request,
+		@RequestAttribute("userId") Long userId) {
+		Long todoId = todoService.createTodo(request, userId);
 
 		return ResponseEntity.created(URI.create("/api/v1/todos/" + todoId)).build();
 	}
 
 	@PutMapping("/{todoId}")
 	public ResponseEntity<String> updateTodo(@RequestBody TodoRequest request,
-		@PathVariable Long todoId) {
-		Long updatedTodoId = todoService.updateTodo(request, todoId);
+		@PathVariable Long todoId, @RequestAttribute("userId") Long userId) {
+		Long updatedTodoId = todoService.updateTodo(request, todoId, userId);
 
 		return ResponseEntity.created(URI.create("/api/v1/todos/" + todoId)).build();
 	}
 
 	@DeleteMapping("/{todoId}")
-	public ResponseEntity<Void> deleteTodo(@PathVariable Long todoId) {
-		todoService.deleteTodo(todoId);
+	public ResponseEntity<Void> deleteTodo(@PathVariable Long todoId,
+		@RequestAttribute("userId") Long userId) {
+
+		todoService.deleteTodo(todoId, userId);
 
 		return ResponseEntity.ok().build();
 	}
 
 	@PatchMapping("/{todoId}")
 	public ResponseEntity<String> setInputTime(@PathVariable Long todoId,
-		@RequestBody TodoInputTimeRequest request) {
-		Long updatedTodoId = todoService.setInputTime(todoId, request);
+		@RequestBody TodoInputTimeRequest request, @RequestAttribute("userId") Long userId) {
+		Long updatedTodoId = todoService.setInputTime(todoId, request, userId);
 
 		return ResponseEntity.created(URI.create("/api/v1/todos/" + todoId)).build();
 	}
 
+	// TODO : 아래 상태 변경 로직 수정
 	@PatchMapping("/{todoId}/status-updates")
 	public ResponseEntity<String> updateStatus(@RequestBody TodoStatusRequest request,
 		@PathVariable Long todoId) {
@@ -63,36 +70,39 @@ public class TodoController {
 	}
 
 	@GetMapping("/statuses")
-	public ResponseEntity<List<TodoResponse>> getTodosByStatus(@RequestParam TodoStatus status) {
-		List<TodoResponse> todoResponses = todoService.getTodosByStatus(status);
+	public ResponseEntity<List<TodoResponse>> getTodosByStatus(@RequestParam TodoStatus status,
+		@RequestAttribute("userId") Long userId) {
+		List<TodoResponse> todoResponses = todoService.getTodosByStatus(status, userId);
 
 		return ResponseEntity.ok().body(todoResponses);
 	}
 
 	@GetMapping("/dates")
-	public ResponseEntity<List<TodoResponse>> getTodosByDate(@RequestParam LocalDate date) {
-		List<TodoResponse> todoResponses = todoService.getTodosByDate(date);
+	public ResponseEntity<List<TodoResponse>> getTodosByDate(@RequestParam LocalDate date,
+		@RequestAttribute("userId") Long userId) {
+		List<TodoResponse> todoResponses = todoService.getTodosByDate(date, userId);
 
 		return ResponseEntity.ok().body(todoResponses);
 	}
 
 	@GetMapping("/categories/{category}")
-	public ResponseEntity<List<TodoResponse>> getTodosByCategory(@PathVariable String category) {
-		List<TodoResponse> todoResponses = todoService.getTodosByCategory(category);
+	public ResponseEntity<List<TodoResponse>> getTodosByCategory(@PathVariable String category,
+		@RequestAttribute("userId") Long userId) {
+		List<TodoResponse> todoResponses = todoService.getTodosByCategory(category, userId);
 
 		return ResponseEntity.ok().body(todoResponses);
 	}
 
 	@GetMapping()
-	public ResponseEntity<List<TodoResponse>> getTodos() {
-		List<TodoResponse> todoResponses = todoService.getTodos();
+	public ResponseEntity<List<TodoResponse>> getTodos(@RequestAttribute("userId") Long userId) {
+		List<TodoResponse> todoResponses = todoService.getTodos(userId);
 
 		return ResponseEntity.ok().body(todoResponses);
 	}
 
 	@GetMapping("/priorities")
-	public ResponseEntity<List<TodoResponse>> getPriorities() {
-		List<TodoResponse> priorities = todoService.getPriorities();
+	public ResponseEntity<List<TodoResponse>> getPriorities(@RequestAttribute("userId") Long userId) {
+		List<TodoResponse> priorities = todoService.getPriorities(userId);
 
 		return ResponseEntity.ok().body(priorities);
 	}

@@ -4,7 +4,11 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.onesentence.onesentence.domain.todo.dto.TodoPriority;
 import org.onesentence.onesentence.domain.todo.entity.QTodo;
@@ -19,7 +23,7 @@ public class TodoQueryImpl implements TodoQuery {
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override
-	public List<TodoPriority> calculatePriority() {
+	public List<TodoPriority> calculatePriority(Long userId) {
 		QTodo todo = QTodo.todo;
 
 		NumberTemplate<Integer> durationInMinutes = Expressions.numberTemplate(Integer.class,
@@ -44,7 +48,8 @@ public class TodoQueryImpl implements TodoQuery {
 			.from(todo)
 			.where(todo.status.eq(TodoStatus.TODO)
 				.or(todo.status.eq(TodoStatus.IN_PROGRESS))
-				.and(todo.together.isNull()))
+				.and(todo.together.isNull())
+				.and(todo.userId.eq(userId)))
 			.fetch();
 	}
 
@@ -55,6 +60,53 @@ public class TodoQueryImpl implements TodoQuery {
 		return jpaQueryFactory
 			.selectFrom(todo)
 			.where(todo.id.in(optimalOrder))
+			.fetch();
+	}
+
+	@Override
+	public List<Todo> findByStatus(TodoStatus status, Long userId) {
+		QTodo todo = QTodo.todo;
+
+		return jpaQueryFactory
+			.selectFrom(todo)
+			.where(todo.status.eq(status)
+				.and(todo.userId.eq(userId)))
+			.fetch();
+	}
+
+	@Override
+	public List<Todo> findByDate(LocalDate date, Long userId) {
+		QTodo todo = QTodo.todo;
+
+		LocalDateTime startOfDay = date.atStartOfDay();
+		LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
+
+		return jpaQueryFactory
+			.selectFrom(todo)
+			.where(todo.start.loe(endOfDay)
+				.and(todo.end.goe(startOfDay))
+				.and(todo.userId.eq(userId)))
+			.fetch();
+	}
+
+	@Override
+	public List<Todo> findByCategory(String category, Long userId) {
+		QTodo todo = QTodo.todo;
+
+		return jpaQueryFactory
+			.selectFrom(todo)
+			.where(todo.category.eq(category)
+				.and(todo.userId.eq(userId)))
+			.fetch();
+	}
+
+	@Override
+	public List<Todo> findAll(Long userId) {
+		QTodo todo = QTodo.todo;
+
+		return jpaQueryFactory
+			.selectFrom(todo)
+			.where(todo.userId.eq(userId))
 			.fetch();
 	}
 

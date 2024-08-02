@@ -5,5 +5,5 @@ import org.onesentence.onesentence.domain.text.dto.TextRequest;
 
 public interface TextService {
 
-	Long createTodoByOneSentence(TextRequest request) throws JsonProcessingException;
+	Long createTodoByOneSentence(TextRequest request, Long userId) throws JsonProcessingException;
 }

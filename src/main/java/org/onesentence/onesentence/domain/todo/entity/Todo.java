@@ -45,7 +45,10 @@ public class Todo {
 	@Column
 	private Integer inputTime;
 
-	public Todo(TodoRequest request) {
+	@Column
+	private Long userId;
+
+	public Todo(TodoRequest request, Long userId) {
 		this.title = request.getTitle();
 		this.start = LocalDateTime.of(request.getStartYear(), request.getStartMonth(),
 			request.getStartDay(), request.getStartHour(), request.getStartMinute());
@@ -56,6 +59,7 @@ public class Todo {
 		this.location = request.getLocation();
 		this.together = request.getTogether();
 		this.inputTime = request.getInputTime();
+		this.userId = userId;
 	}
 
 	public void changeToInProgress() {

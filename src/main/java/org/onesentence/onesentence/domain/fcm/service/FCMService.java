@@ -7,4 +7,6 @@ import org.springframework.stereotype.Service;
 public interface FCMService {
 
 	int sendMessageTo(FCMSendDto fcmSendDto) throws IOException;
+
+	void test(String test);
 }

@@ -38,6 +38,8 @@ dependencies {
 	implementation 'com.google.firebase:firebase-admin:9.2.0'           // Google Firebase Admin
 	implementation 'com.fasterxml.jackson.core:jackson-core:2.16.1'     // Jackson Data Bind
 
+	implementation 'org.springframework.boot:spring-boot-starter-quartz:2.7.5'      // Spring Boot Quartz
+
 	implementation 'io.jsonwebtoken:jjwt:0.9.1'
 	// com.sun.xml.bind
 	implementation 'com.sun.xml.bind:jaxb-impl:4.0.1'

@@ -10,6 +10,7 @@ import org.onesentence.onesentence.domain.todo.dto.TodoResponse;
 import org.onesentence.onesentence.domain.todo.dto.TodoStatusRequest;
 import org.onesentence.onesentence.domain.todo.entity.TodoStatus;
 import org.onesentence.onesentence.domain.todo.service.TodoService;
+import org.quartz.SchedulerException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +23,7 @@ public class TodoController {
 
 	@PostMapping
 	public ResponseEntity<String> createTodo(@RequestBody TodoRequest request,
-		@RequestAttribute("userId") Long userId) {
+		@RequestAttribute("userId") Long userId) throws SchedulerException {
 		Long todoId = todoService.createTodo(request, userId);
 
 		return ResponseEntity.created(URI.create("/api/v1/todos/" + todoId)).build();

@@ -1,58 +1,58 @@
 package org.onesentence.onesentence.domain.todo.service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.onesentence.onesentence.domain.dijkstra.model.Graph;
 import org.onesentence.onesentence.domain.dijkstra.model.Node;
 import org.onesentence.onesentence.domain.dijkstra.service.DijkstraService;
+import org.onesentence.onesentence.domain.fcm.service.SchedulerService;
 import org.onesentence.onesentence.domain.gpt.dto.GPTCallTodoRequest;
 import org.onesentence.onesentence.domain.todo.dto.*;
 import org.onesentence.onesentence.domain.todo.entity.Todo;
 import org.onesentence.onesentence.domain.todo.entity.TodoStatus;
 import org.onesentence.onesentence.domain.todo.repository.TodoJpaRepository;
 import org.onesentence.onesentence.domain.todo.repository.TodoQuery;
-import org.onesentence.onesentence.domain.todo.repository.TodoQueryImpl;
 import org.onesentence.onesentence.domain.user.entity.User;
 import org.onesentence.onesentence.domain.user.repository.UserJpaRepository;
 import org.onesentence.onesentence.global.exception.ExceptionStatus;
 import org.onesentence.onesentence.global.exception.NotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.quartz.SchedulerException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class TodoServiceImpl implements TodoService{
+public class TodoServiceImpl implements TodoService {
 
 	private final TodoJpaRepository todoJpaRepository;
 	private final TodoQuery todoQuery;
 	private final DijkstraService dijkstraService;
 	private final UserJpaRepository userJpaRepository;
+	private final SchedulerService schedulerService;
 
-	private User checkUserByUserId (Long userId) {
+	private User checkUserByUserId(Long userId) {
 		return userJpaRepository.findById(userId)
 			.orElseThrow(() -> new NotFoundException(ExceptionStatus.NOT_FOUND));
 	}
 
 	@Override
 	@Transactional
-	public Long createTodo(TodoRequest request, Long userId) {
+	public Long createTodo(TodoRequest request, Long userId) throws SchedulerException {
 
 		User user = checkUserByUserId(userId);
 
 		Todo todo = new Todo(request, user.getId());
 
 		Todo savedTodo = todoJpaRepository.save(todo);
+
+		schedulerService.setScheduler(savedTodo.getStart(), user.getFcmToken(),
+			savedTodo.getTitle(), savedTodo.getId());
 
 		return savedTodo.getId();
 	}
@@ -64,7 +64,7 @@ public class TodoServiceImpl implements TodoService{
 		User user = checkUserByUserId(userId);
 		Todo todo = findById(todoId);
 
-		if(!todo.getUserId().equals(user.getId())) {
+		if (!todo.getUserId().equals(user.getId())) {
 			throw new IllegalArgumentException("TODO 작성자가 아닙니다.");
 		}
 
@@ -85,7 +85,7 @@ public class TodoServiceImpl implements TodoService{
 		User user = checkUserByUserId(userId);
 		Todo todo = findById(todoId);
 
-		if(!todo.getUserId().equals(user.getId())) {
+		if (!todo.getUserId().equals(user.getId())) {
 			throw new IllegalArgumentException("TODO 작성자가 아닙니다.");
 		}
 
@@ -176,7 +176,7 @@ public class TodoServiceImpl implements TodoService{
 
 		List<Node> nodes = new ArrayList<>();
 
-		for(TodoPriority todoPriority : todoPriorities) {
+		for (TodoPriority todoPriority : todoPriorities) {
 			nodes.add(new Node(todoPriority.getTodoId(), todoPriority.getPriorityScore()));
 		}
 		Graph graph = new Graph(nodes);
@@ -236,7 +236,7 @@ public class TodoServiceImpl implements TodoService{
 		User user = checkUserByUserId(userId);
 		Todo todo = findById(todoId);
 
-		if(!todo.getUserId().equals(user.getId())) {
+		if (!todo.getUserId().equals(user.getId())) {
 			throw new IllegalArgumentException("TODO 작성자가 아닙니다.");
 		}
 

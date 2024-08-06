@@ -8,10 +8,11 @@ import org.onesentence.onesentence.domain.todo.dto.TodoRequest;
 import org.onesentence.onesentence.domain.todo.dto.TodoResponse;
 import org.onesentence.onesentence.domain.todo.dto.TodoStatusRequest;
 import org.onesentence.onesentence.domain.todo.entity.TodoStatus;
+import org.quartz.SchedulerException;
 
 public interface TodoService {
 
-	Long createTodo(TodoRequest request, Long userId);
+	Long createTodo(TodoRequest request, Long userId) throws SchedulerException;
 
 	Long updateTodo(TodoRequest request, Long todoId, Long userId);
 

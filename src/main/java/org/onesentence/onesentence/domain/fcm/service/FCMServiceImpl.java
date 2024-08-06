@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.onesentence.onesentence.domain.fcm.dto.FCMMessageDto;
 import org.onesentence.onesentence.domain.fcm.dto.FCMSendDto;
 import org.springframework.core.io.ClassPathResource;
@@ -15,6 +16,7 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FCMServiceImpl implements FCMService{
@@ -66,5 +68,10 @@ public class FCMServiceImpl implements FCMService{
 				).build()).validateOnly(false).build();
 
 		return objectMapper.writeValueAsString(fcmMessageDto);
+	}
+
+	@Override
+	public void test(String test) {
+		log.info(test);
 	}
 }

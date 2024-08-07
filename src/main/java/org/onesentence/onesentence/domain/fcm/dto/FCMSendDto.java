@@ -3,7 +3,6 @@ package org.onesentence.onesentence.domain.fcm.dto;
 import lombok.*;
 
 @Getter
-@ToString
 @NoArgsConstructor
 @Builder
 public class FCMSendDto {

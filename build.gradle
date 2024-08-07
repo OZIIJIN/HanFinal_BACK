@@ -35,7 +35,9 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.1'
 
-	implementation 'com.google.firebase:firebase-admin:9.2.0'           // Google Firebase Admin
+	implementation 'com.google.firebase:firebase-admin:9.1.1'
+	implementation 'com.squareup.okhttp3:okhttp:4.11.0'
+
 	implementation 'com.fasterxml.jackson.core:jackson-core:2.16.1'     // Jackson Data Bind
 
 	implementation 'org.springframework.boot:spring-boot-starter-quartz:2.7.5'      // Spring Boot Quartz

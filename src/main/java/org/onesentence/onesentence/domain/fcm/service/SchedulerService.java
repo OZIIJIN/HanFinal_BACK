@@ -2,16 +2,12 @@ package org.onesentence.onesentence.domain.fcm.service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.onesentence.onesentence.domain.fcm.job.FcmJob;
 import org.quartz.*;
-import org.quartz.impl.StdSchedulerFactory;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @RequiredArgsConstructor
 @Service

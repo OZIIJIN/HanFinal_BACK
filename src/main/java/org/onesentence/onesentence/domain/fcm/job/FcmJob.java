@@ -1,5 +1,6 @@
 package org.onesentence.onesentence.domain.fcm.job;
 
+import com.google.firebase.messaging.FirebaseMessagingException;
 import java.io.IOException;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -32,7 +33,11 @@ public class FcmJob implements Job {
 			.body("시작하셨다면 진행 사항을 변경하세요!")
 			.build();
 
-		fcmService.test(todoTitle);
+		try {
+			fcmService.sendMessageTo(fcmSendDto);
+		} catch (IOException | FirebaseMessagingException e) {
+			throw new RuntimeException(e);
+		}
 
 
 	}

@@ -1,5 +1,6 @@
 package org.onesentence.onesentence.domain.fcm.controller;
 
+import com.google.firebase.messaging.FirebaseMessagingException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,12 +25,13 @@ public class FCMController {
 	private final FCMService fcmService;
 
 	@PostMapping("/send")
-	public ResponseEntity<Integer> pushMessage(
-		@RequestBody @Validated FCMSendDto fcmSendDto) throws IOException {
+	public ResponseEntity<String> pushMessage(
+		@RequestBody @Validated FCMSendDto fcmSendDto)
+		throws IOException, FirebaseMessagingException {
 
 		log.debug("[+] 푸시 메시지를 전송합니다. ");
-		int result = fcmService.sendMessageTo(fcmSendDto);
+		String response = fcmService.sendMessageTo(fcmSendDto);
 
-		return ResponseEntity.ok().body(result);
+		return ResponseEntity.ok().body(response);
 	}
 }

@@ -2,28 +2,27 @@ package org.onesentence.onesentence.domain.fcm.job;
 
 import com.google.firebase.messaging.FirebaseMessagingException;
 import java.io.IOException;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.core.ApplicationContext;
 import org.onesentence.onesentence.domain.fcm.dto.FCMSendDto;
 import org.onesentence.onesentence.domain.fcm.service.FCMService;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.context.ApplicationContext;
 
 @Slf4j
-@NoArgsConstructor
-@AllArgsConstructor
-@Component
 public class FcmJob implements Job {
 
-	@Autowired
 	private FCMService fcmService;
 
 	public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+
+		if (fcmService == null) {
+			// [STEP1] Service 인터페이스를 호출하기 위해 ApplicationContext에 appContext 이름으로 bean을 등록합니다.
+			ApplicationContext appCtx = (ApplicationContext) jobExecutionContext.getJobDetail()
+				.getJobDataMap().get("appContext");
+			fcmService = appCtx.getBean(FCMService.class);
+		}
 
 		String todoTitle = jobExecutionContext.getMergedJobDataMap().getString("todoTitle");
 
@@ -34,7 +33,8 @@ public class FcmJob implements Job {
 			.build();
 
 		try {
-			fcmService.sendMessageTo(fcmSendDto);
+			String respone = fcmService.sendMessageTo(fcmSendDto);
+			log.info(respone);
 		} catch (IOException | FirebaseMessagingException e) {
 			throw new RuntimeException(e);
 		}

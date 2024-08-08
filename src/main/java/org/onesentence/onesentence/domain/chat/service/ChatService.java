@@ -8,5 +8,5 @@ public interface ChatService {
 
 	ChatRoomResponseDto createChatRoom();
 
-	ChatMessageDto createChat(Long roomId, ChatMessageDto message);
+	ChatMessageDto createChat(ChatMessageDto message);
 }

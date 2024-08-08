@@ -21,14 +21,10 @@ public class Chat {
 	private Long id;
 
 	@Column
-	private Long roomId;
-
-	@Column
 	private String message;
 
-	public Chat(ChatMessageDto chatMessageDto, Long chatRoomId) {
+	public Chat(ChatMessageDto chatMessageDto) {
 		this.message = chatMessageDto.getMessage();
-		this.roomId = chatRoomId;
 	}
 
 

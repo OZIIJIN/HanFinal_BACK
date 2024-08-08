@@ -28,16 +28,13 @@ public class ChatServiceImpl implements ChatService {
 	}
 
 	@Override
-	public ChatMessageDto createChat(Long roomId, ChatMessageDto message) {
+	public ChatMessageDto createChat(ChatMessageDto message) {
 
-		ChatRoom room = findRoomById(roomId);
-
-		Chat chat = new Chat(message, room.getId());
+		Chat chat = new Chat(message);
 
 		Chat savedChat = chatJpaRepository.save(chat);
 
 		return ChatMessageDto.builder()
-			.roomId(room.getId())
 			.message(savedChat.getMessage())
 			.build();
 	}

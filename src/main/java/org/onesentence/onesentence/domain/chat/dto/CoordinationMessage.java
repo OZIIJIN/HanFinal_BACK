@@ -9,10 +9,18 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChatMessageDto {
+public class CoordinationMessage {
+
+	private boolean label;
 
 	private Long todoId;
 
 	private String message;
+
+	private String todoTitle;
+
+	private String start;
+
+	private String end;
 
 }

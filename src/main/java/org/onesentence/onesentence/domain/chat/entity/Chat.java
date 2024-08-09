@@ -20,11 +20,16 @@ public class Chat {
 	@Column(name = "chat_id")
 	private Long id;
 
+
+	@Column
+	private Long todoId;
+
 	@Column
 	private String message;
 
 	public Chat(ChatMessageDto chatMessageDto) {
 		this.message = chatMessageDto.getMessage();
+		this.todoId = chatMessageDto.getTodoId();
 	}
 
 

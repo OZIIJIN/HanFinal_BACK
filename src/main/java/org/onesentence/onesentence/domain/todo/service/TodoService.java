@@ -35,4 +35,6 @@ public interface TodoService {
 	Long createTodoByOneSentence(GPTCallTodoRequest gptCallTodoRequest, Long userId);
 
 	Long setInputTime(Long todoId, TodoInputTimeRequest request, Long userId);
+
+	void coordinateTodo(TodoRequest request, Long userId) throws SchedulerException;
 }

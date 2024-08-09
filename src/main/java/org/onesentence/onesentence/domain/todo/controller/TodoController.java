@@ -4,6 +4,7 @@ import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
 import org.onesentence.onesentence.domain.todo.dto.TodoInputTimeRequest;
 import org.onesentence.onesentence.domain.todo.dto.TodoRequest;
 import org.onesentence.onesentence.domain.todo.dto.TodoResponse;
@@ -27,6 +28,15 @@ public class TodoController {
 		Long todoId = todoService.createTodo(request, userId);
 
 		return ResponseEntity.created(URI.create("/api/v1/todos/" + todoId)).build();
+	}
+
+	@PostMapping("/coordination")
+	public ResponseEntity<Void> coordinateTodo(@RequestBody TodoRequest request,
+		@RequestAttribute("userId") Long userId) throws SchedulerException {
+
+		todoService.coordinateTodo(request, userId);
+
+		return ResponseEntity.ok().build();
 	}
 
 	@PutMapping("/{todoId}")

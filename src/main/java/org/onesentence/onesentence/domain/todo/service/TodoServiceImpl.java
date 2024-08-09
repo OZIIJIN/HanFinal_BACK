@@ -1,12 +1,14 @@
 package org.onesentence.onesentence.domain.todo.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.onesentence.onesentence.domain.chat.dto.CoordinationMessageDto;
 import org.onesentence.onesentence.domain.dijkstra.model.Graph;
 import org.onesentence.onesentence.domain.dijkstra.model.Node;
 import org.onesentence.onesentence.domain.dijkstra.service.DijkstraService;
@@ -22,6 +24,7 @@ import org.onesentence.onesentence.domain.user.repository.UserJpaRepository;
 import org.onesentence.onesentence.global.exception.ExceptionStatus;
 import org.onesentence.onesentence.global.exception.NotFoundException;
 import org.quartz.SchedulerException;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +38,7 @@ public class TodoServiceImpl implements TodoService {
 	private final DijkstraService dijkstraService;
 	private final UserJpaRepository userJpaRepository;
 	private final SchedulerService schedulerService;
+	private final SimpMessagingTemplate simpMessagingTemplate;
 
 	private User checkUserByUserId(Long userId) {
 		return userJpaRepository.findById(userId)
@@ -243,5 +247,35 @@ public class TodoServiceImpl implements TodoService {
 		todo.setInputTime(request.getInputTime());
 
 		return todo.getId();
+	}
+
+	@Override
+	public void coordinateTodo(TodoRequest request, Long userId) throws SchedulerException {
+
+		User user = checkUserByUserId(userId);
+
+		Todo todo = new Todo(request, user.getId());
+
+		Todo savedTodo = todoJpaRepository.save(todo);
+
+		schedulerService.setScheduler(savedTodo.getStart(), user.getFcmToken(),
+			savedTodo.getTitle(), savedTodo.getId());
+
+		CoordinationMessageDto messageDto = CoordinationMessageDto.builder()
+			.label(true)
+			.todoId(savedTodo.getId())
+			.message("아래 일정을 조율하고자 합니다.")
+			.todoTitle(savedTodo.getTitle())
+			.start(dateConvertToString(savedTodo.getStart()))
+			.end(dateConvertToString(savedTodo.getEnd()))
+			.build();
+
+		simpMessagingTemplate.convertAndSend("/sub/chatroom/hanfinal", messageDto);
+	}
+
+	private String dateConvertToString(LocalDateTime localDateTime) {
+		return localDateTime.getYear() + "년 " + localDateTime.getMonthValue() + "월 "
+			+ localDateTime.getDayOfMonth() + "일 " + localDateTime.getHour() + "시 "
+			+ localDateTime.getMinute() + "분";
 	}
 }

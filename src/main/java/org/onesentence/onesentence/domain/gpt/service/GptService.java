@@ -8,7 +8,7 @@ public interface GptService {
 
 	GPTCallTodoRequest gptCall(String prompt) throws JsonProcessingException;
 
-	GPTAnalyzeResponse gptCallForTodoCoordination(String prompt) throws JsonProcessingException;
+	GPTAnalyzeResponse gptCallForTodoCoordination(String prompt, Long todoId) throws JsonProcessingException;
 
 	String test(String prompt) ;
 }

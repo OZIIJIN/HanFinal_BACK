@@ -28,9 +28,9 @@ public class GPTController {
 	}
 
 	@GetMapping("/analyze")
-	public ResponseEntity<GPTAnalyzeResponse> analyze(@RequestParam("prompt") String prompt)
+	public ResponseEntity<GPTAnalyzeResponse> analyze(@RequestParam("todo") Long todoId, @RequestParam("prompt") String prompt)
 		throws JsonProcessingException {
-		GPTAnalyzeResponse response = gptService.gptCallForTodoCoordination(prompt);
+		GPTAnalyzeResponse response = gptService.gptCallForTodoCoordination(prompt, todoId);
 		//String response = gptService.test(prompt);
 
 		return ResponseEntity.ok().body(response);

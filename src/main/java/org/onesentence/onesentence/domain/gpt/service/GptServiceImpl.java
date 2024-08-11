@@ -42,8 +42,8 @@ public class GptServiceImpl implements GptService {
 	private final String SYSTEM_MESSAGE_ANALYZE =
 //		"너는 prompt에 담긴 일정 관련 문장을 JSON 형태로 date에 LocalDateTime 타입으로 담아주는 역할이야."
 //			+ "현재 날짜: " + LocalDateTime.now();
-		"너는 prompt에 담긴 문장이 긍정이면 yes, 부정이면 no로 분석하는 역할이야. "
-			+ "게다가 만약 prompt에 일정에 관련된 말이 포함되면 해당 일정을 LocalDateTime 타입으로 담아줘. "
+		"너는 prompt에 담긴 문장이 긍정이면 yes, 부정이면 no로 분석하는 역할이야."
+			+ "게다가 만약 prompt에 일정에 관련된 말이 포함되면 해당 일정을 LocalDateTime 타입으로 담아주고 일정에 관련된 말이 포함되면 no야."
 			+ "JSON 형태로 analyze, date에 담아줘 만약 date가 없다고 판단하면 null 표시해줘. "
 			+ "현재 날짜: " + LocalDateTime.now();
 
@@ -62,7 +62,7 @@ public class GptServiceImpl implements GptService {
 
 		// GPT 요청 객체를 생성, 모델명, 파라미터 등 설정
 		GPTRequest request = new GPTRequest(
-			model, 0, 256, 1, 1, 1, messages);
+			model, 0, 256, 1, 0, 0, messages);
 
 		// OpenAI API에 POST 요청을 보내고 응답을 GPTResponse 객체로 받음
 		GPTResponse gptResponse = restTemplate.postForObject(
@@ -84,7 +84,7 @@ public class GptServiceImpl implements GptService {
 			GPTCallTodoRequest.class);
 	}
 
-	public GPTAnalyzeResponse gptCallForTodoCoordination(String prompt) throws JsonProcessingException {
+	public GPTAnalyzeResponse gptCallForTodoCoordination(String prompt, Long todoId) throws JsonProcessingException {
 
 		List<Message> messages = new ArrayList<>();
 		messages.add(new Message("system", SYSTEM_MESSAGE_ANALYZE));
@@ -106,7 +106,9 @@ public class GptServiceImpl implements GptService {
 			.replace("```", "")      // 끝 태그 제거
 			.trim();                 // 앞뒤 공백 제거
 
-		return objectMapper.readValue(jsonString, GPTAnalyzeResponse.class);
+		GPTAnalyzeResponse gptAnalyzeResponse = objectMapper.readValue(jsonString, GPTAnalyzeResponse.class);
+		gptAnalyzeResponse.setTodoId(todoId);
+		return gptAnalyzeResponse;
 	}
 
 	@Override

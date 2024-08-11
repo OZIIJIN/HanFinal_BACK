@@ -2,6 +2,7 @@ package org.onesentence.onesentence.domain.todo.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.onesentence.onesentence.domain.todo.dto.TodoDate;
 import org.onesentence.onesentence.domain.todo.dto.TodoPriority;
 import org.onesentence.onesentence.domain.todo.entity.Todo;
 import org.onesentence.onesentence.domain.todo.entity.TodoStatus;
@@ -19,4 +20,6 @@ public interface TodoQuery {
 	List<Todo> findByCategory(String category, Long userId);
 
 	List<Todo> findAll(Long userId);
+
+	List<TodoDate> getTodoDatesByUserId(Long userId);
 }

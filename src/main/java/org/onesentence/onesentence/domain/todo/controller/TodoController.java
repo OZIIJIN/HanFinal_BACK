@@ -4,7 +4,7 @@ import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
+import org.onesentence.onesentence.domain.todo.dto.AvailableTimeSlots;
 import org.onesentence.onesentence.domain.todo.dto.TodoInputTimeRequest;
 import org.onesentence.onesentence.domain.todo.dto.TodoRequest;
 import org.onesentence.onesentence.domain.todo.dto.TodoResponse;
@@ -116,5 +116,12 @@ public class TodoController {
 		List<TodoResponse> priorities = todoService.getPriorities(userId);
 
 		return ResponseEntity.ok().body(priorities);
+	}
+
+	@GetMapping("/test/{todoId}")
+	public ResponseEntity<AvailableTimeSlots> test(@PathVariable Long todoId) {
+		AvailableTimeSlots result = todoService.findAvailableTimeSlots(todoId);
+
+		return ResponseEntity.ok().body(result);
 	}
 }

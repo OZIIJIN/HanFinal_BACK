@@ -1,18 +1,20 @@
 package org.onesentence.onesentence.domain.todo.service;
 
+import java.time.*;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.onesentence.onesentence.domain.chat.dto.CoordinationMessageDto;
+import org.onesentence.onesentence.domain.chat.dto.CoordinationMessage;
 import org.onesentence.onesentence.domain.dijkstra.model.Graph;
 import org.onesentence.onesentence.domain.dijkstra.model.Node;
 import org.onesentence.onesentence.domain.dijkstra.service.DijkstraService;
 import org.onesentence.onesentence.domain.fcm.service.SchedulerService;
+import org.onesentence.onesentence.domain.todo.dto.AvailableTimeSlots;
 import org.onesentence.onesentence.domain.gpt.dto.GPTCallTodoRequest;
 import org.onesentence.onesentence.domain.todo.dto.*;
 import org.onesentence.onesentence.domain.todo.entity.Todo;
@@ -77,6 +79,8 @@ public class TodoServiceImpl implements TodoService {
 		return todo.getId();
 	}
 
+	@Override
+	@Transactional(readOnly = true)
 	public Todo findById(Long todoId) {
 		return todoJpaRepository.findById(todoId).orElseThrow(() -> new NotFoundException(
 			ExceptionStatus.NOT_FOUND));
@@ -250,6 +254,7 @@ public class TodoServiceImpl implements TodoService {
 	}
 
 	@Override
+	@Transactional
 	public void coordinateTodo(TodoRequest request, Long userId) throws SchedulerException {
 
 		User user = checkUserByUserId(userId);
@@ -261,8 +266,8 @@ public class TodoServiceImpl implements TodoService {
 		schedulerService.setScheduler(savedTodo.getStart(), user.getFcmToken(),
 			savedTodo.getTitle(), savedTodo.getId());
 
-		CoordinationMessageDto messageDto = CoordinationMessageDto.builder()
-			.label(true)
+		CoordinationMessage messageDto = CoordinationMessage.builder()
+			.label("answer")
 			.todoId(savedTodo.getId())
 			.message("아래 일정을 조율하고자 합니다.")
 			.todoTitle(savedTodo.getTitle())
@@ -271,6 +276,74 @@ public class TodoServiceImpl implements TodoService {
 			.build();
 
 		simpMessagingTemplate.convertAndSend("/sub/chatroom/hanfinal", messageDto);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<TodoDate> getTodoDatesByUserId(Long todoId) {
+		Todo todo = findById(todoId);
+
+		return todoQuery.getTodoDatesByUserId(todo.getUserId());
+	}
+
+	@Transactional(readOnly = true)
+	public AvailableTimeSlots findAvailableTimeSlots(Long todoId) {
+
+		Todo targetTodo = findById(todoId);
+
+		LocalDate targetDate = targetTodo.getStart().toLocalDate();
+		LocalDateTime startDate = targetDate.atTime(LocalTime.of(10, 0));
+		LocalDateTime endDate = targetDate.plusDays(2).atTime(LocalTime.of(21, 0)); // 이틀 후 21시
+
+		List<Todo> todos = todoJpaRepository.findByUserIdAndStartBetween(targetTodo.getUserId(),
+			startDate, endDate);
+
+		List<Todo> sortedTodos = todos.stream()
+			.sorted(Comparator.comparing(Todo::getStart))
+			.toList();
+
+		List<LocalDateTime> availableTimeSlots = new ArrayList<>();
+
+		int inputTimeMinutes = targetTodo.getInputTime();
+
+		LocalDateTime lastEndTime = startDate;
+
+		for (Todo todo : sortedTodos) {
+
+			// 이전 일정의 종료 시간과 현재 일정의 시작 시간 사이의 간격이 inputTime 이상인지 확인
+			while (lastEndTime.plusMinutes(inputTimeMinutes).isBefore(todo.getStart()) &&
+				lastEndTime.getHour() < 21) {
+				availableTimeSlots.add(lastEndTime);
+				if (availableTimeSlots.size() == 3) {
+					return new AvailableTimeSlots(availableTimeSlots);
+				}
+				lastEndTime = lastEndTime.plusMinutes(inputTimeMinutes); // 3시간 추가
+				// 각 날짜의 끝 시간(21:00)으로 넘어가면 다음 날 10:00으로 설정
+				if (lastEndTime.getHour() >= 21) {
+					lastEndTime = lastEndTime.toLocalDate().plusDays(1).atTime(10, 0);
+				}
+			}
+
+			// 마지막 일정의 종료 시간을 업데이트
+			lastEndTime = todo.getEnd();
+		}
+
+		// 마지막 일정 후의 빈 시간대도 확인
+		while (lastEndTime.plusMinutes(inputTimeMinutes).isBefore(endDate) &&
+			lastEndTime.getHour() < 21) {
+			availableTimeSlots.add(lastEndTime);
+			if (availableTimeSlots.size() == 3) {
+				return new AvailableTimeSlots(availableTimeSlots);
+			}
+			lastEndTime = lastEndTime.plusMinutes(inputTimeMinutes); // 3시간 추가
+			// 각 날짜의 끝 시간(21:00)으로 넘어가면 다음 날 10:00으로 설정
+			if (lastEndTime.getHour() >= 21) {
+				lastEndTime = lastEndTime.toLocalDate().plusDays(1).atTime(10, 0);
+			}
+		}
+
+		return new AvailableTimeSlots(availableTimeSlots);
+
 	}
 
 	private String dateConvertToString(LocalDateTime localDateTime) {

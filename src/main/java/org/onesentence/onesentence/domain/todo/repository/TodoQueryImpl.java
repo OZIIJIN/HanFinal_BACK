@@ -10,6 +10,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.onesentence.onesentence.domain.todo.dto.TodoDate;
 import org.onesentence.onesentence.domain.todo.dto.TodoPriority;
 import org.onesentence.onesentence.domain.todo.entity.QTodo;
 import org.onesentence.onesentence.domain.todo.entity.Todo;
@@ -107,6 +108,24 @@ public class TodoQueryImpl implements TodoQuery {
 		return jpaQueryFactory
 			.selectFrom(todo)
 			.where(todo.userId.eq(userId))
+			.fetch();
+	}
+
+	@Override
+	public List<TodoDate> getTodoDatesByUserId(Long userId) {
+		QTodo todo = QTodo.todo;
+
+		return jpaQueryFactory
+			.select(Projections.constructor(TodoDate.class,
+				todo.id.as("todoId"),
+				todo.title,
+				todo.start.as("todoStart"),
+				todo.end.as("todoEnd"),
+				todo.inputTime))
+			.from(todo)
+			.where(todo.userId.eq(userId)
+				.and(todo.start.after(LocalDateTime.now())))
+			.orderBy(todo.start.desc())
 			.fetch();
 	}
 

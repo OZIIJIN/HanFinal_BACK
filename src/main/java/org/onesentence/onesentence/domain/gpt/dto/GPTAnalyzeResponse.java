@@ -16,9 +16,4 @@ public class GPTAnalyzeResponse {
 	private LocalDateTime date;
 
 	private Long todoId;
-
-	public void setTodoId (Long todoId) {
-		this.todoId = todoId;
-	}
-
 }

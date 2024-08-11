@@ -20,7 +20,4 @@ public class CoordinationMessage {
 	private String todoTitle;
 
 	private String start;
-
-	private String end;
-
 }

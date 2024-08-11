@@ -9,12 +9,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChatMessage {
+public class ChatTypeMessage {
 
-	private Long todoId;
+	private String label;
 
 	private String message;
-
-	private String type;
-
 }

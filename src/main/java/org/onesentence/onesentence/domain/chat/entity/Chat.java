@@ -26,9 +26,13 @@ public class Chat {
 	@Column
 	private String message;
 
-	public Chat(ChatMessage chatMessageDto) {
+	@Column
+	private ChatType chatType;
+
+	public Chat(ChatMessage chatMessageDto, ChatType type) {
 		this.message = chatMessageDto.getMessage();
 		this.todoId = chatMessageDto.getTodoId();
+		this.chatType = type;
 	}
 
 

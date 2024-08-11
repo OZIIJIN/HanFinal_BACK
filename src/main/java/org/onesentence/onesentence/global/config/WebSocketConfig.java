@@ -22,7 +22,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
 	@Override
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
-		registry.addEndpoint("/ws-stomp").setAllowedOrigins("*");
+		registry.addEndpoint("/ws-stomp")
+			.setAllowedOrigins("https://9ede-122-36-149-213.ngrok-free.app");
 		// 주소 : ws://localhost:8080/ws-stomp
 	}
 }

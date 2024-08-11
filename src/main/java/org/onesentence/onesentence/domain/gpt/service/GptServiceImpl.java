@@ -21,8 +21,6 @@ import org.springframework.web.client.RestTemplate;
 @RequiredArgsConstructor
 public class GptServiceImpl implements GptService {
 
-	private final TodoService todoService;
-
 	// GPT-3.5 API 호출에 사용할 모델을 지정, 기본값은 'gpt-4o'
 	@Value("${openai.model:gpt-4o}")
 	private String model;
@@ -107,7 +105,7 @@ public class GptServiceImpl implements GptService {
 			.trim();                 // 앞뒤 공백 제거
 
 		GPTAnalyzeResponse gptAnalyzeResponse = objectMapper.readValue(jsonString, GPTAnalyzeResponse.class);
-		gptAnalyzeResponse.setTodoId(todoId);
+
 		return gptAnalyzeResponse;
 	}
 

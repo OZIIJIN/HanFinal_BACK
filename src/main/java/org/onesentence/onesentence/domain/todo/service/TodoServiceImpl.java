@@ -1,20 +1,20 @@
 package org.onesentence.onesentence.domain.todo.service;
 
-import java.time.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.onesentence.onesentence.domain.chat.dto.ChatMessage;
+import org.onesentence.onesentence.domain.chat.dto.ChatTypeMessage;
 import org.onesentence.onesentence.domain.chat.dto.CoordinationMessage;
 import org.onesentence.onesentence.domain.dijkstra.model.Graph;
 import org.onesentence.onesentence.domain.dijkstra.model.Node;
 import org.onesentence.onesentence.domain.dijkstra.service.DijkstraService;
 import org.onesentence.onesentence.domain.fcm.service.SchedulerService;
-import org.onesentence.onesentence.domain.todo.dto.AvailableTimeSlots;
 import org.onesentence.onesentence.domain.gpt.dto.GPTCallTodoRequest;
 import org.onesentence.onesentence.domain.todo.dto.*;
 import org.onesentence.onesentence.domain.todo.entity.Todo;
@@ -42,7 +42,7 @@ public class TodoServiceImpl implements TodoService {
 	private final SchedulerService schedulerService;
 	private final SimpMessagingTemplate simpMessagingTemplate;
 
-	private User checkUserByUserId(Long userId) {
+	private User findUserByUserId(Long userId) {
 		return userJpaRepository.findById(userId)
 			.orElseThrow(() -> new NotFoundException(ExceptionStatus.NOT_FOUND));
 	}
@@ -51,7 +51,7 @@ public class TodoServiceImpl implements TodoService {
 	@Transactional
 	public Long createTodo(TodoRequest request, Long userId) throws SchedulerException {
 
-		User user = checkUserByUserId(userId);
+		User user = findUserByUserId(userId);
 
 		Todo todo = new Todo(request, user.getId());
 
@@ -67,7 +67,7 @@ public class TodoServiceImpl implements TodoService {
 	@Transactional
 	public Long updateTodo(TodoRequest request, Long todoId, Long userId) {
 
-		User user = checkUserByUserId(userId);
+		User user = findUserByUserId(userId);
 		Todo todo = findById(todoId);
 
 		if (!todo.getUserId().equals(user.getId())) {
@@ -90,7 +90,7 @@ public class TodoServiceImpl implements TodoService {
 	@Transactional
 	public void deleteTodo(Long todoId, Long userId) {
 
-		User user = checkUserByUserId(userId);
+		User user = findUserByUserId(userId);
 		Todo todo = findById(todoId);
 
 		if (!todo.getUserId().equals(user.getId())) {
@@ -241,7 +241,7 @@ public class TodoServiceImpl implements TodoService {
 	@Transactional
 	public Long setInputTime(Long todoId, TodoInputTimeRequest request, Long userId) {
 
-		User user = checkUserByUserId(userId);
+		User user = findUserByUserId(userId);
 		Todo todo = findById(todoId);
 
 		if (!todo.getUserId().equals(user.getId())) {
@@ -257,7 +257,7 @@ public class TodoServiceImpl implements TodoService {
 	@Transactional
 	public void coordinateTodo(TodoRequest request, Long userId) throws SchedulerException {
 
-		User user = checkUserByUserId(userId);
+		User user = findUserByUserId(userId);
 
 		Todo todo = new Todo(request, user.getId());
 
@@ -267,12 +267,11 @@ public class TodoServiceImpl implements TodoService {
 			savedTodo.getTitle(), savedTodo.getId());
 
 		CoordinationMessage messageDto = CoordinationMessage.builder()
-			.label("answer")
+			.label("yesorno")
 			.todoId(savedTodo.getId())
 			.message("아래 일정을 조율하고자 합니다.")
 			.todoTitle(savedTodo.getTitle())
 			.start(dateConvertToString(savedTodo.getStart()))
-			.end(dateConvertToString(savedTodo.getEnd()))
 			.build();
 
 		simpMessagingTemplate.convertAndSend("/sub/chatroom/hanfinal", messageDto);
@@ -302,7 +301,7 @@ public class TodoServiceImpl implements TodoService {
 			.sorted(Comparator.comparing(Todo::getStart))
 			.toList();
 
-		List<LocalDateTime> availableTimeSlots = new ArrayList<>();
+		List<String> availableTimeSlots = new ArrayList<>();
 
 		int inputTimeMinutes = targetTodo.getInputTime();
 
@@ -313,7 +312,7 @@ public class TodoServiceImpl implements TodoService {
 			// 이전 일정의 종료 시간과 현재 일정의 시작 시간 사이의 간격이 inputTime 이상인지 확인
 			while (lastEndTime.plusMinutes(inputTimeMinutes).isBefore(todo.getStart()) &&
 				lastEndTime.getHour() < 21) {
-				availableTimeSlots.add(lastEndTime);
+				availableTimeSlots.add(dateConvertToString(lastEndTime));
 				if (availableTimeSlots.size() == 3) {
 					return new AvailableTimeSlots(availableTimeSlots);
 				}
@@ -331,7 +330,7 @@ public class TodoServiceImpl implements TodoService {
 		// 마지막 일정 후의 빈 시간대도 확인
 		while (lastEndTime.plusMinutes(inputTimeMinutes).isBefore(endDate) &&
 			lastEndTime.getHour() < 21) {
-			availableTimeSlots.add(lastEndTime);
+			availableTimeSlots.add(dateConvertToString(lastEndTime));
 			if (availableTimeSlots.size() == 3) {
 				return new AvailableTimeSlots(availableTimeSlots);
 			}
@@ -342,13 +341,72 @@ public class TodoServiceImpl implements TodoService {
 			}
 		}
 
+		log.info("빈 시간대 추천");
 		return new AvailableTimeSlots(availableTimeSlots);
+	}
 
+	@Override
+	@Transactional
+	public void checkTimeSlotsAndUpdateTodo(Long todoId, LocalDateTime date) {
+		boolean isPossibleToUpdate = true;
+		Todo todo = findById(todoId);
+		User user = findUserByUserId(todo.getUserId());
+
+		// 해당 시간대에 일정이 겹치는지 확인
+		List<Todo> todos = todoQuery.checkTimeSlots(todo.getUserId(), date);
+
+		LocalDateTime endTimeSlot = date.plusMinutes(todo.getInputTime());
+
+		for (Todo t : todos) {
+			if ((!date.isBefore(todo.getStart()) && !date.isAfter(todo.getEnd()))
+				|| (!endTimeSlot.isBefore(todo.getStart()) && !endTimeSlot.isAfter(
+				todo.getEnd()))) {
+
+				isPossibleToUpdate = false;
+
+				//일정이 겹치는 거기때문에
+				ChatTypeMessage chatTypeMessageFalse = ChatTypeMessage.builder()
+					.label("message")
+					.message(user.getNickName() + "님의 일정이 이미 존재합니다. 다른 시간을 입력해주세요!")
+					.build();
+
+				log.info("다시 채팅 사용자 입력을 받아야함");
+				simpMessagingTemplate.convertAndSend("/sub/chatroom/hanfinal",
+					chatTypeMessageFalse);
+			}
+		}
+
+		if (isPossibleToUpdate) {
+			todo.updateTodoDate(date, endTimeSlot);
+
+			ChatTypeMessage chatTypeMessageTrue = ChatTypeMessage.builder()
+				.label("message")
+				.message("일정이 확정되었습니다.")
+				.build();
+
+			log.info("채팅 사용자 입력 시간으로 일정 확정");
+			simpMessagingTemplate.convertAndSend("/sub/chatroom/hanfinal", chatTypeMessageTrue);
+		}
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public void updateTodoDate(Long todoId, LocalDateTime start) {
+		Todo todo = findById(todoId);
+
+		LocalDateTime end = start.plusMinutes(todo.getInputTime());
+
+		log.info(start + "/" + end + "일정 확정");
+
+		todo.updateTodoDate(start, end);
 	}
 
 	private String dateConvertToString(LocalDateTime localDateTime) {
-		return localDateTime.getYear() + "년 " + localDateTime.getMonthValue() + "월 "
-			+ localDateTime.getDayOfMonth() + "일 " + localDateTime.getHour() + "시 "
-			+ localDateTime.getMinute() + "분";
+		// DateTimeFormatter 생성 (한국어 로케일 사용)
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일 a h시 m분",
+			Locale.KOREAN);
+
+		// LocalDateTime을 문자열로 포맷
+		return localDateTime.format(formatter);
 	}
 }

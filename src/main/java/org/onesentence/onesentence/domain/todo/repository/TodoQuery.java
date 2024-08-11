@@ -1,6 +1,7 @@
 package org.onesentence.onesentence.domain.todo.repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.onesentence.onesentence.domain.todo.dto.TodoDate;
 import org.onesentence.onesentence.domain.todo.dto.TodoPriority;
@@ -22,4 +23,6 @@ public interface TodoQuery {
 	List<Todo> findAll(Long userId);
 
 	List<TodoDate> getTodoDatesByUserId(Long userId);
+
+	List<Todo> checkTimeSlots(Long userId, LocalDateTime date);
 }

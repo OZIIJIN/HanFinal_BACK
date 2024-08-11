@@ -118,7 +118,7 @@ public class TodoController {
 		return ResponseEntity.ok().body(priorities);
 	}
 
-	@GetMapping("/test/{todoId}")
+	@GetMapping("/{todoId}/available-time")
 	public ResponseEntity<AvailableTimeSlots> test(@PathVariable Long todoId) {
 		AvailableTimeSlots result = todoService.findAvailableTimeSlots(todoId);
 

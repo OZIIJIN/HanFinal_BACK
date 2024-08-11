@@ -13,11 +13,17 @@ public class AvailableTimeSlots {
 
 	private String label;
 
-	private List<LocalDateTime> availableTimeSlots;
+	private String start1;
 
-	public AvailableTimeSlots (List<LocalDateTime> availableTimeSlots) {
-		this.availableTimeSlots = availableTimeSlots;
+	private String start2;
+
+	private String start3;
+
+	public AvailableTimeSlots (List<String> availableTimeSlots) {
 		this.label = "select";
+		this.start1 = availableTimeSlots.get(0);
+		this.start2 = availableTimeSlots.get(1);
+		this.start3 = availableTimeSlots.get(2);
 	}
 
 }

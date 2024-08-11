@@ -96,4 +96,9 @@ public class Todo {
 	public void setInputTime(int inputTime) {
 		this.inputTime = inputTime;
 	}
+
+	public void updateTodoDate(LocalDateTime start, LocalDateTime end) {
+		this.start = start;
+		this.end = end;
+	}
 }

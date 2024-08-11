@@ -1,6 +1,7 @@
 package org.onesentence.onesentence.domain.todo.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.onesentence.onesentence.domain.todo.dto.AvailableTimeSlots;
 import org.onesentence.onesentence.domain.gpt.dto.GPTCallTodoRequest;
@@ -42,4 +43,8 @@ public interface TodoService {
 	Todo findById(Long todoId);
 
 	AvailableTimeSlots findAvailableTimeSlots(Long todoId);
+
+	void checkTimeSlotsAndUpdateTodo(Long todoId, LocalDateTime date);
+
+	void updateTodoDate(Long todoId, LocalDateTime start);
 }

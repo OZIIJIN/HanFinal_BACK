@@ -129,4 +129,19 @@ public class TodoQueryImpl implements TodoQuery {
 			.fetch();
 	}
 
+	@Override
+	public List<Todo> checkTimeSlots(Long userId, LocalDateTime date) {
+		QTodo todo = QTodo.todo;
+
+		LocalDate targetDate = date.toLocalDate();
+
+		return jpaQueryFactory
+			.selectFrom(todo)
+			.where(todo.userId.eq(userId)
+				.and(todo.start.between(
+					targetDate.atStartOfDay(),
+					targetDate.atTime(23, 59, 59))))
+			.fetch();
+	}
+
 }

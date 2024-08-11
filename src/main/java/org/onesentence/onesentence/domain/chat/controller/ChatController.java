@@ -1,5 +1,6 @@
 package org.onesentence.onesentence.domain.chat.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.onesentence.onesentence.domain.chat.dto.ChatMessage;
 import org.onesentence.onesentence.domain.chat.dto.ChatRoomResponse;
@@ -24,10 +25,9 @@ public class ChatController {
 	}
 
 	@MessageMapping("/chatroom/hanfinal")
-	@SendTo("/chatroom/hanfinal")
-	public ChatMessage chat (ChatMessage message) {
+	public void chat (ChatMessage message) throws JsonProcessingException {
 
-		return chatService.createChat(message);
+		chatService.chat(message);
 	}
 
 }

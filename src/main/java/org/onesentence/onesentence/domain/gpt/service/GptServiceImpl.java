@@ -2,24 +2,29 @@ package org.onesentence.onesentence.domain.gpt.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.onesentence.onesentence.domain.gpt.dto.GPTCallTodoRequest;
-import org.onesentence.onesentence.domain.gpt.dto.GPTRequest;
-import org.onesentence.onesentence.domain.gpt.dto.GPTResponse;
-import org.onesentence.onesentence.domain.gpt.dto.Message;
+import org.onesentence.onesentence.domain.gpt.dto.*;
+import org.onesentence.onesentence.domain.todo.dto.TodoDate;
+import org.onesentence.onesentence.domain.todo.entity.Todo;
+import org.onesentence.onesentence.domain.todo.service.TodoService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 @Service
 @RequiredArgsConstructor
 public class GptServiceImpl implements GptService {
 
-	// GPT-3.5 API 호출에 사용할 모델을 지정, 기본값은 'gpt-3.5-turbo'
-	@Value("${openai.model:gpt-3.5-turbo}")
+	private final TodoService todoService;
+
+	// GPT-3.5 API 호출에 사용할 모델을 지정, 기본값은 'gpt-4o'
+	@Value("${openai.model:gpt-4o}")
 	private String model;
 
 	// OpenAI API의 URL을 지정, 기본값은 채팅 컴플리션 엔드포인트
@@ -33,6 +38,14 @@ public class GptServiceImpl implements GptService {
 			+ "아래 양식 꼭 지켜줘. 현재 날짜는 "
 			+ LocalDateTime.now()
 			+ "이야. title, category, location, together 는 String 타입, start, end 는 LocalDateTime 타입이야.";
+
+	private final String SYSTEM_MESSAGE_ANALYZE =
+//		"너는 prompt에 담긴 일정 관련 문장을 JSON 형태로 date에 LocalDateTime 타입으로 담아주는 역할이야."
+//			+ "현재 날짜: " + LocalDateTime.now();
+		"너는 prompt에 담긴 문장이 긍정이면 yes, 부정이면 no로 분석하는 역할이야. "
+			+ "게다가 만약 prompt에 일정에 관련된 말이 포함되면 해당 일정을 LocalDateTime 타입으로 담아줘. "
+			+ "JSON 형태로 analyze, date에 담아줘 만약 date가 없다고 판단하면 null 표시해줘. "
+			+ "현재 날짜: " + LocalDateTime.now();
 
 	// RestTemplate 객체를 주입받음
 	private final RestTemplate restTemplate;
@@ -49,7 +62,7 @@ public class GptServiceImpl implements GptService {
 
 		// GPT 요청 객체를 생성, 모델명, 파라미터 등 설정
 		GPTRequest request = new GPTRequest(
-			model, 0, 256, 1, 0, 0, messages);
+			model, 0, 256, 1, 1, 1, messages);
 
 		// OpenAI API에 POST 요청을 보내고 응답을 GPTResponse 객체로 받음
 		GPTResponse gptResponse = restTemplate.postForObject(
@@ -59,11 +72,41 @@ public class GptServiceImpl implements GptService {
 		);
 
 		// GPT 응답에서 첫 번째 선택지의 메시지 내용을 JSON 문자열로 가져옴
-		String jsonString = gptResponse.getChoices().get(0).getMessage().getContent();
+		String rawJsonString = gptResponse.getChoices().get(0).getMessage().getContent();
+
+		String jsonString = rawJsonString
+			.replace("```json", "")  // 시작 태그 제거
+			.replace("```", "")      // 끝 태그 제거
+			.trim();                 // 앞뒤 공백 제거
 
 		// JSON 문자열을 GPTCallTodoRequest 객체로 변환하여 반환
 		return objectMapper.readValue(jsonString,
 			GPTCallTodoRequest.class);
+	}
+
+	public GPTAnalyzeResponse gptCallForTodoCoordination(String prompt) throws JsonProcessingException {
+
+		List<Message> messages = new ArrayList<>();
+		messages.add(new Message("system", SYSTEM_MESSAGE_ANALYZE));
+		messages.add(new Message("user", prompt));
+
+		GPTRequest request = new GPTRequest(
+			model, 0, 256, 1, 0, 0, messages);
+
+		GPTResponse gptResponse = restTemplate.postForObject(
+			apiUrl
+			, request
+			, GPTResponse.class
+		);
+
+		String rawJsonString = gptResponse.getChoices().get(0).getMessage().getContent();
+
+		String jsonString = rawJsonString
+			.replace("```json", "")  // 시작 태그 제거
+			.replace("```", "")      // 끝 태그 제거
+			.trim();                 // 앞뒤 공백 제거
+
+		return objectMapper.readValue(jsonString, GPTAnalyzeResponse.class);
 	}
 
 	@Override
@@ -73,7 +116,7 @@ public class GptServiceImpl implements GptService {
 		messages.add(new Message("user", prompt));
 
 		GPTRequest request = new GPTRequest(
-			model,0, 256, 1, 0, 0, messages);
+			model, 0, 256, 1, 0, 0, messages);
 
 		GPTResponse gptResponse = restTemplate.postForObject(
 			apiUrl

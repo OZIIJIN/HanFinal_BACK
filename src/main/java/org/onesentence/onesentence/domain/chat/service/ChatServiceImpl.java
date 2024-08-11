@@ -1,8 +1,8 @@
 package org.onesentence.onesentence.domain.chat.service;
 
 import lombok.RequiredArgsConstructor;
-import org.onesentence.onesentence.domain.chat.dto.ChatMessageDto;
-import org.onesentence.onesentence.domain.chat.dto.ChatRoomResponseDto;
+import org.onesentence.onesentence.domain.chat.dto.ChatMessage;
+import org.onesentence.onesentence.domain.chat.dto.ChatRoomResponse;
 import org.onesentence.onesentence.domain.chat.entity.Chat;
 import org.onesentence.onesentence.domain.chat.entity.ChatRoom;
 import org.onesentence.onesentence.domain.chat.repository.ChatJpaRepository;
@@ -19,22 +19,22 @@ public class ChatServiceImpl implements ChatService {
 	private final ChatJpaRepository chatJpaRepository;
 
 	@Override
-	public ChatRoomResponseDto createChatRoom() {
+	public ChatRoomResponse createChatRoom() {
 		ChatRoom chatRoom = new ChatRoom();
 
 		ChatRoom savedChatRoom = chatRoomJpaRepository.save(chatRoom);
 
-		return ChatRoomResponseDto.from(savedChatRoom);
+		return ChatRoomResponse.from(savedChatRoom);
 	}
 
 	@Override
-	public ChatMessageDto createChat(ChatMessageDto message) {
+	public ChatMessage createChat(ChatMessage message) {
 
 		Chat chat = new Chat(message);
 
 		Chat savedChat = chatJpaRepository.save(chat);
 
-		return ChatMessageDto.builder()
+		return ChatMessage.builder()
 			.message(savedChat.getMessage())
 			.build();
 	}

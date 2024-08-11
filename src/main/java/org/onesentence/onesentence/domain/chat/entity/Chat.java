@@ -5,8 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.checkerframework.checker.units.qual.C;
-import org.onesentence.onesentence.domain.chat.dto.ChatMessageDto;
+import org.onesentence.onesentence.domain.chat.dto.ChatMessage;
 
 @Getter
 @Builder
@@ -27,7 +26,7 @@ public class Chat {
 	@Column
 	private String message;
 
-	public Chat(ChatMessageDto chatMessageDto) {
+	public Chat(ChatMessage chatMessageDto) {
 		this.message = chatMessageDto.getMessage();
 		this.todoId = chatMessageDto.getTodoId();
 	}

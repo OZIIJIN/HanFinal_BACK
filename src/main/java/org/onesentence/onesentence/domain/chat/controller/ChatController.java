@@ -1,8 +1,8 @@
 package org.onesentence.onesentence.domain.chat.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.onesentence.onesentence.domain.chat.dto.ChatMessageDto;
-import org.onesentence.onesentence.domain.chat.dto.ChatRoomResponseDto;
+import org.onesentence.onesentence.domain.chat.dto.ChatMessage;
+import org.onesentence.onesentence.domain.chat.dto.ChatRoomResponse;
 import org.onesentence.onesentence.domain.chat.service.ChatService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -17,15 +17,15 @@ public class ChatController {
 	private final ChatService chatService;
 
 	@PostMapping("/api/v1/chatroom")
-	public ResponseEntity<ChatRoomResponseDto> createChatRoom() {
-		ChatRoomResponseDto response = chatService.createChatRoom();
+	public ResponseEntity<ChatRoomResponse> createChatRoom() {
+		ChatRoomResponse response = chatService.createChatRoom();
 
 		return ResponseEntity.ok().body(response);
 	}
 
 	@MessageMapping("/chatroom/hanfinal")
 	@SendTo("/chatroom/hanfinal")
-	public ChatMessageDto chat (ChatMessageDto message) {
+	public ChatMessage chat (ChatMessage message) {
 
 		return chatService.createChat(message);
 	}

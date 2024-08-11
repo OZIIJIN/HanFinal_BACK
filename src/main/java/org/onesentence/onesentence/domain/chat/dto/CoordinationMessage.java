@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CoordinationMessage {
 
-	private boolean label;
+	private String label;
 
 	private Long todoId;
 

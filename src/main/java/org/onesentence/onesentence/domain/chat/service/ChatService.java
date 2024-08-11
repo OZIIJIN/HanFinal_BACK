@@ -1,12 +1,12 @@
 package org.onesentence.onesentence.domain.chat.service;
 
-import org.onesentence.onesentence.domain.chat.dto.ChatMessageDto;
-import org.onesentence.onesentence.domain.chat.dto.ChatRoomResponseDto;
+import org.onesentence.onesentence.domain.chat.dto.ChatMessage;
+import org.onesentence.onesentence.domain.chat.dto.ChatRoomResponse;
 
 public interface ChatService {
 
 
-	ChatRoomResponseDto createChatRoom();
+	ChatRoomResponse createChatRoom();
 
-	ChatMessageDto createChat(ChatMessageDto message);
+	ChatMessage createChat(ChatMessage message);
 }

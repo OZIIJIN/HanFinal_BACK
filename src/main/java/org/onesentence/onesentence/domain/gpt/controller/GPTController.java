@@ -2,6 +2,7 @@ package org.onesentence.onesentence.domain.gpt.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
+import org.onesentence.onesentence.domain.gpt.dto.GPTAnalyzeResponse;
 import org.onesentence.onesentence.domain.gpt.dto.GPTCallTodoRequest;
 import org.onesentence.onesentence.domain.gpt.service.GptService;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,15 @@ public class GPTController {
 	public ResponseEntity<GPTCallTodoRequest> chat(@RequestParam("prompt") String prompt)
 		throws JsonProcessingException {
 		GPTCallTodoRequest response = gptService.gptCall(prompt);
+		//String response = gptService.test(prompt);
+
+		return ResponseEntity.ok().body(response);
+	}
+
+	@GetMapping("/analyze")
+	public ResponseEntity<GPTAnalyzeResponse> analyze(@RequestParam("prompt") String prompt)
+		throws JsonProcessingException {
+		GPTAnalyzeResponse response = gptService.gptCallForTodoCoordination(prompt);
 		//String response = gptService.test(prompt);
 
 		return ResponseEntity.ok().body(response);

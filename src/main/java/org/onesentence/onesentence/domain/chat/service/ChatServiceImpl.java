@@ -96,6 +96,13 @@ public class ChatServiceImpl implements ChatService {
 
 			if(response.getAnalyze().equals("no") && response.getDate() != null) {
 				todoService.checkTimeSlotsAndUpdateTodo(message.getTodoId(), response.getDate());
+			} else if(response.getAnalyze().equals("yes")) {
+				ChatTypeMessage chatTypeMessage = ChatTypeMessage.builder()
+					.label("message")
+					.message("일정이 확정되었습니다!")
+					.build();
+
+				simpMessagingTemplate.convertAndSend("/sub/chatroom/hanfinal", chatTypeMessage);
 			}
 		}
 

@@ -20,7 +20,7 @@ public class AvailableTimeSlots {
 	private String start3;
 
 	public AvailableTimeSlots (List<String> availableTimeSlots) {
-		this.label = "select";
+		this.label = "date";
 		this.start1 = availableTimeSlots.get(0);
 		this.start2 = availableTimeSlots.get(1);
 		this.start3 = availableTimeSlots.get(2);

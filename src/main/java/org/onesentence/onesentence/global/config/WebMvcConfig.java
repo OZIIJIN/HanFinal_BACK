@@ -18,7 +18,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
 		log.info("인터셉터 등록");
 		registry.addInterceptor(loginInterceptor)
 			.addPathPatterns("/**")
-			.excludePathPatterns("/api/v1/users/sign-up");
+			.excludePathPatterns("/api/v1/users/sign-up")
+			.excludePathPatterns("**/ws-stomp");
 	}
 
 }

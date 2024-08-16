@@ -1,5 +1,6 @@
 package org.onesentence.onesentence.domain.weather.controller;
 
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.onesentence.onesentence.domain.weather.dto.WeatherDto;
 import org.onesentence.onesentence.domain.weather.service.WeatherService;
@@ -15,12 +16,9 @@ public class WeatherController {
 	private final WeatherService weatherService;
 
 	@GetMapping()
-	public String getCurrentWeather() {
-		try {
-			return weatherService.procWeather();
-		} catch (Exception e) {
-			return "Error occurred: " + e.getMessage();
-		}
+	public boolean getCurrentWeather() throws Exception {
+
+		return weatherService.procWeather(LocalDateTime.now());
 	}
 
 }

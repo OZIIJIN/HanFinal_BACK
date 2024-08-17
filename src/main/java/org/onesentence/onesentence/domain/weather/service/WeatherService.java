@@ -7,8 +7,18 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.onesentence.onesentence.domain.fcm.dto.FCMSendDto;
+import org.onesentence.onesentence.domain.fcm.service.FCMService;
+import org.onesentence.onesentence.domain.todo.entity.Todo;
+import org.onesentence.onesentence.domain.todo.repository.TodoJpaRepository;
+import org.onesentence.onesentence.domain.user.entity.User;
+import org.onesentence.onesentence.domain.user.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
@@ -16,7 +26,12 @@ import org.w3c.dom.NodeList;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class WeatherService {
+
+	private final TodoJpaRepository todoJpaRepository;
+	private final FCMService fcmService;
+	private final UserService userService;
 
 	@Value("${weather.api.key}")
 	private String apiKey;
@@ -101,12 +116,12 @@ public class WeatherService {
 		return weatherData;
 	}
 
-	public boolean procWeather(LocalDateTime dateTime) throws Exception {
+	public String procWeather(LocalDateTime dateTime) throws Exception {
 
 		Map<String, String> dictSky = forecast(dateTime);
 
 		// 기본 날씨 메시지 설정
-		Boolean needToPush = false;
+		StringBuilder strSky = new StringBuilder();
 
 		// 날씨 상태에 따른 메시지 추가
 		if (dictSky != null) {
@@ -114,14 +129,28 @@ public class WeatherService {
 
 			// sky2 (강수형태) 처리
 			if (sky2 != null) {
+
 				switch (sky2) {
+					case "0":
+						strSky.append("0");
+						break;
 					case "1":
+						strSky.append("1");
+						break;
 					case "2":
+						strSky.append("2");
+						break;
 					case "3":
+						strSky.append("3");
+						break;
 					case "5":
+						strSky.append("5");
+						break;
 					case "6":
+						strSky.append("6");
+						break;
 					case "7":
-						needToPush = true;
+						strSky.append("7");
 						break;
 				}
 
@@ -129,7 +158,66 @@ public class WeatherService {
 
 		}
 
-		return needToPush;
+		return strSky.toString();
 	}
+	public void processWeatherNotifications() throws Exception {
+		int pageSize = 1000;
+		int pageNumber = 0;
+		LocalDateTime tomorrowStart = LocalDateTime.now().plusDays(1).toLocalDate().atStartOfDay();
+		LocalDateTime tomorrowEnd = tomorrowStart.plusDays(1).minusSeconds(1);
+
+		while (true) {
+			Pageable pageable = PageRequest.of(pageNumber++, pageSize);
+			Page<Todo> todoPage = todoJpaRepository.findByStartBetween(tomorrowStart, tomorrowEnd, pageable);
+			if (!todoPage.hasContent()) break;
+
+			for (Todo todo : todoPage.getContent()) {
+				User user = userService.findByUserId(todo.getUserId());
+				FCMSendDto fcmSendDto = createNotificationMessage(todo, user);
+				if (fcmSendDto != null) {
+					fcmService.sendMessageTo(fcmSendDto);
+				}
+			}
+		}
+	}
+
+	private FCMSendDto createNotificationMessage(Todo todo, User user) throws Exception {
+		String weatherForecast = procWeather(todo.getStart());
+
+		return switch (weatherForecast) {
+			case "1" -> FCMSendDto.builder()
+				.token(user.getFcmToken())
+				.title("비가 올 예정입니다.")
+				.body("일정 변경을 원하시면 클릭하세요!")
+				.build();
+			case "2" -> FCMSendDto.builder()
+				.token(user.getFcmToken())
+				.title("비와 눈이 올 예정입니다.")
+				.body("일정 변경을 원하시면 클릭하세요!")
+				.build();
+			case "3" -> FCMSendDto.builder()
+				.token(user.getFcmToken())
+				.title("눈이 올 예정입니다.")
+				.body("일정 변경을 원하시면 클릭하세요!")
+				.build();
+			case "5" -> FCMSendDto.builder()
+				.token(user.getFcmToken())
+				.title("빗방울이 떨어질 예정입니다.")
+				.body("일정 변경을 원하시면 클릭하세요!")
+				.build();
+			case "6" -> FCMSendDto.builder()
+				.token(user.getFcmToken())
+				.title("빗방울과 눈이 날릴 예정입니다.")
+				.body("일정 변경을 원하시면 클릭하세요!")
+				.build();
+			case "7" -> FCMSendDto.builder()
+				.token(user.getFcmToken())
+				.title("눈이 날릴 예정입니다.")
+				.body("일정 변경을 원하시면 클릭하세요!")
+				.build();
+			default -> null;
+		};
+	}
+
 
 }

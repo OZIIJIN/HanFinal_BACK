@@ -16,7 +16,7 @@ public class WeatherController {
 	private final WeatherService weatherService;
 
 	@GetMapping()
-	public boolean getCurrentWeather() throws Exception {
+	public String getCurrentWeather() throws Exception {
 
 		return weatherService.procWeather(LocalDateTime.now());
 	}

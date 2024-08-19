@@ -231,6 +231,7 @@ public class TodoServiceImpl implements TodoService {
 			.location(gptCallTodoRequest.getLocation())
 			.together(gptCallTodoRequest.getTogether())
 			.userId(userId)
+			.inputTime(gptCallTodoRequest.getInputTime())
 			.build();
 		Todo savedTodo = todoJpaRepository.save(todo);
 

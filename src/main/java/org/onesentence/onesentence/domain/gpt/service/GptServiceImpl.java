@@ -32,10 +32,10 @@ public class GptServiceImpl implements GptService {
 	// 시스템 메시지를 정의, 현재 날짜와 시간 포함
 	private final String SYSTEM_MESSAGE =
 		"너는 한 문장에서 여러 단어를 분류하는 역할이야. "
-			+ "prompt 문장을 일정으로 등록하려는데 JSON 형태로 일정 내용, 카테고리, 일정 시작 시간, 일정 끝 시간, 장소, 협업자로 분류해줘. 해당 값이 없으면 null 표시해줘. "
+			+ "prompt 문장을 일정으로 등록하려는데 JSON 형태로 일정 내용, 카테고리, 일정 시작 시간, 일정 끝 시간, 장소, 협업자, 소요 시간(시간)으로 분류해줘. 해당 값이 없으면 null 표시해줘. "
 			+ "아래 양식 꼭 지켜줘. 현재 날짜는 "
 			+ LocalDateTime.now()
-			+ "이야. title, category, location, together 는 String 타입, start, end 는 LocalDateTime 타입이야.";
+			+ "이야. title, category, location, together 는 String 타입, start, end 는 LocalDateTime 타입이고 inputTime 은 Integer 타입이야.";
 
 	private final String SYSTEM_MESSAGE_ANALYZE =
 //		"너는 prompt에 담긴 일정 관련 문장을 JSON 형태로 date에 LocalDateTime 타입으로 담아주는 역할이야."

@@ -21,4 +21,6 @@ public class GPTCallTodoRequest {
 	private String location;
 
 	private String together;
+
+	private Integer inputTime;
 }

@@ -36,8 +36,7 @@ out/
 ### VS Code ###
 .vscode/
 
-### apiKey ###
-application.properties
+
 
 
 ### firebase dev key ###

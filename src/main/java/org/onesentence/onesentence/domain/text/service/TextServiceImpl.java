@@ -26,4 +26,5 @@ public class TextServiceImpl implements TextService {
 
 		return todoService.createTodoByOneSentence(gptCallTodoRequest, userId);
 	}
+
 }

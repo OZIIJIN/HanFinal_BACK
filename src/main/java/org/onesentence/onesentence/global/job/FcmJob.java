@@ -1,4 +1,4 @@
-package org.onesentence.onesentence.domain.fcm.job;
+package org.onesentence.onesentence.global.job;
 
 import com.google.firebase.messaging.FirebaseMessagingException;
 import java.io.IOException;
@@ -30,6 +30,7 @@ public class FcmJob implements Job {
 			.token(jobExecutionContext.getMergedJobDataMap().getString("fcmToken"))
 			.title(todoTitle + "시작할 시간입니다!")
 			.body("시작하셨다면 진행 사항을 변경하세요!")
+			.todoId(jobExecutionContext.getMergedJobDataMap().getLong("todoId"))
 			.build();
 
 		try {

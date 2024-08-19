@@ -3,7 +3,7 @@ package org.onesentence.onesentence.domain.fcm.service;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import lombok.RequiredArgsConstructor;
-import org.onesentence.onesentence.domain.fcm.job.FcmJob;
+import org.onesentence.onesentence.global.job.FcmJob;
 import org.quartz.*;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
@@ -25,6 +25,7 @@ public class SchedulerService {
 		jobDataMap.put(APPLICATION_NAME, applicationContext);
 		jobDataMap.put("fcmToken", fcmToken);
 		jobDataMap.put("todoTitle", todoTitle);
+		jobDataMap.put("todoId", todoId);
 
 		JobDetail job = JobBuilder
 			.newJob(FcmJob.class)

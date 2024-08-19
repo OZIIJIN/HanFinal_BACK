@@ -12,10 +12,13 @@ public class FCMSendDto {
 
 	private String body;
 
-	public FCMSendDto(String token, String title, String body) {
+	private Long todoId;
+
+	public FCMSendDto(String token, String title, String body, Long todoId) {
 		this.token = token;
 		this.title = title;
 		this.body = body;
+		this.todoId = todoId;
 	}
 
 }

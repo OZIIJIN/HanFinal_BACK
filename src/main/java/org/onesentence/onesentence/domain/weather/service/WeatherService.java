@@ -189,31 +189,37 @@ public class WeatherService {
 				.token(user.getFcmToken())
 				.title("비가 올 예정입니다.")
 				.body("일정 변경을 원하시면 클릭하세요!")
+				.todoId(todo.getId())
 				.build();
 			case "2" -> FCMSendDto.builder()
 				.token(user.getFcmToken())
 				.title("비와 눈이 올 예정입니다.")
 				.body("일정 변경을 원하시면 클릭하세요!")
+				.todoId(todo.getId())
 				.build();
 			case "3" -> FCMSendDto.builder()
 				.token(user.getFcmToken())
 				.title("눈이 올 예정입니다.")
 				.body("일정 변경을 원하시면 클릭하세요!")
+				.todoId(todo.getId())
 				.build();
 			case "5" -> FCMSendDto.builder()
 				.token(user.getFcmToken())
 				.title("빗방울이 떨어질 예정입니다.")
 				.body("일정 변경을 원하시면 클릭하세요!")
+				.todoId(todo.getId())
 				.build();
 			case "6" -> FCMSendDto.builder()
 				.token(user.getFcmToken())
 				.title("빗방울과 눈이 날릴 예정입니다.")
 				.body("일정 변경을 원하시면 클릭하세요!")
+				.todoId(todo.getId())
 				.build();
 			case "7" -> FCMSendDto.builder()
 				.token(user.getFcmToken())
 				.title("눈이 날릴 예정입니다.")
 				.body("일정 변경을 원하시면 클릭하세요!")
+				.todoId(todo.getId())
 				.build();
 			default -> null;
 		};

@@ -40,6 +40,7 @@ public class GPTController {
 		throws JsonProcessingException {
 		GPTAnalyzeResponse response = gptService.gptCallForTodoCoordination(prompt, todoId);
 		//String response = gptService.test(prompt);
-    
 
+		return ResponseEntity.ok().body(response);
+	}
 }

@@ -67,7 +67,8 @@ public class WeatherService {
 	public Map<String, String> forecast(LocalDateTime dateTime) throws Exception {
 		RestTemplate restTemplate = new RestTemplate();
 
-		String stringUrl = String.format("%s?serviceKey=%s&pageNo=1&numOfRows=1000&dataType=XML&base_date=%s&base_time=%s&nx=55&ny=127",
+		String stringUrl = String.format(
+			"%s?serviceKey=%s&pageNo=1&numOfRows=1000&dataType=XML&base_date=%s&base_time=%s&nx=55&ny=127",
 			apiUrl, apiKey, getFormattedDate(dateTime), getFormattedHour(dateTime));
 
 		URI uri = new URI(stringUrl);
@@ -160,6 +161,7 @@ public class WeatherService {
 
 		return strSky.toString();
 	}
+
 	public void processWeatherNotifications() throws Exception {
 		int pageSize = 1000;
 		int pageNumber = 0;
@@ -168,8 +170,11 @@ public class WeatherService {
 
 		while (true) {
 			Pageable pageable = PageRequest.of(pageNumber++, pageSize);
-			Page<Todo> todoPage = todoJpaRepository.findByStartBetween(tomorrowStart, tomorrowEnd, pageable);
-			if (!todoPage.hasContent()) break;
+			Page<Todo> todoPage = todoJpaRepository.findByStartBetween(tomorrowStart, tomorrowEnd,
+				pageable);
+			if (!todoPage.hasContent()) {
+				break;
+			}
 
 			for (Todo todo : todoPage.getContent()) {
 				User user = userService.findByUserId(todo.getUserId());
@@ -183,41 +188,43 @@ public class WeatherService {
 
 	private FCMSendDto createNotificationMessage(Todo todo, User user) throws Exception {
 		String weatherForecast = procWeather(todo.getStart());
+		String today =
+			todo.getStart().getMonthValue() + "월 " + todo.getStart().getDayOfMonth() + "일에 ";
 
 		return switch (weatherForecast) {
 			case "1" -> FCMSendDto.builder()
 				.token(user.getFcmToken())
-				.title("비가 올 예정입니다.")
+				.title(today + "비가 올 예정입니다.")
 				.body("일정 변경을 원하시면 클릭하세요!")
 				.todoId(todo.getId())
 				.build();
 			case "2" -> FCMSendDto.builder()
 				.token(user.getFcmToken())
-				.title("비와 눈이 올 예정입니다.")
+				.title(today + "비와 눈이 올 예정입니다.")
 				.body("일정 변경을 원하시면 클릭하세요!")
 				.todoId(todo.getId())
 				.build();
 			case "3" -> FCMSendDto.builder()
 				.token(user.getFcmToken())
-				.title("눈이 올 예정입니다.")
+				.title(today + "눈이 올 예정입니다.")
 				.body("일정 변경을 원하시면 클릭하세요!")
 				.todoId(todo.getId())
 				.build();
 			case "5" -> FCMSendDto.builder()
 				.token(user.getFcmToken())
-				.title("빗방울이 떨어질 예정입니다.")
+				.title(today + "빗방울이 떨어질 예정입니다.")
 				.body("일정 변경을 원하시면 클릭하세요!")
 				.todoId(todo.getId())
 				.build();
 			case "6" -> FCMSendDto.builder()
 				.token(user.getFcmToken())
-				.title("빗방울과 눈이 날릴 예정입니다.")
+				.title(today + "빗방울과 눈이 날릴 예정입니다.")
 				.body("일정 변경을 원하시면 클릭하세요!")
 				.todoId(todo.getId())
 				.build();
 			case "7" -> FCMSendDto.builder()
 				.token(user.getFcmToken())
-				.title("눈이 날릴 예정입니다.")
+				.title(today + "눈이 날릴 예정입니다.")
 				.body("일정 변경을 원하시면 클릭하세요!")
 				.todoId(todo.getId())
 				.build();

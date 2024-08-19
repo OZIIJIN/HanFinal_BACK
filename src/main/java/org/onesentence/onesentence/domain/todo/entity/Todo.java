@@ -3,6 +3,7 @@ package org.onesentence.onesentence.domain.todo.entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.onesentence.onesentence.domain.todo.dto.TodoRequest;
@@ -12,6 +13,7 @@ import org.onesentence.onesentence.domain.todo.dto.TodoRequest;
 @Table(name = "todo")
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Todo {
 
 	@Id
@@ -25,15 +27,13 @@ public class Todo {
 	private LocalDateTime start;
 
 	@Column
-	private Path path;
-
-	@Column
 	private LocalDateTime end;
 
 	@Column
-	private Long categoryId;
+	private String category;
 
 	@Column
+	@Enumerated(EnumType.STRING)
 	private TodoStatus status;
 
 	@Column
@@ -42,15 +42,24 @@ public class Todo {
 	@Column
 	private String together;
 
-	public Todo(TodoRequest request) {
+	@Column
+	private Integer inputTime;
+
+	@Column
+	private Long userId;
+
+	public Todo(TodoRequest request, Long userId) {
 		this.title = request.getTitle();
-		this.start = request.getStart();
-		this.path = request.getPath();
-		this.categoryId = request.getCategoryId();
-		this.status = TodoStatus.TODO;
-		this.end = request.getEnd();
+		this.start = LocalDateTime.of(request.getStartYear(), request.getStartMonth(),
+			request.getStartDay(), request.getStartHour(), request.getStartMinute());
+		this.category = request.getCategory();
+		this.status = request.getStatus();
+		this.end = LocalDateTime.of(request.getEndYear(), request.getEndMonth(),
+			request.getEndDay(), request.getEndHour(), request.getEndMinute());
 		this.location = request.getLocation();
 		this.together = request.getTogether();
+		this.inputTime = request.getInputTime();
+		this.userId = userId;
 	}
 
 	public void changeToInProgress() {
@@ -63,8 +72,33 @@ public class Todo {
 
 	public void updateTodo(TodoRequest request) {
 		this.title = request.getTitle();
-		this.start = request.getStart();
-		this.categoryId = request.getCategoryId();
-		this.end = request.getEnd();
+		this.start = LocalDateTime.of(request.getStartYear(), request.getStartMonth(),
+			request.getStartDay(), request.getStartHour(), request.getStartMinute());
+		this.category = request.getCategory();
+		this.status = request.getStatus();
+		this.end = LocalDateTime.of(request.getEndYear(), request.getEndMonth(),
+			request.getEndDay(), request.getEndHour(), request.getEndMinute());
+		this.location = request.getLocation();
+		this.together = request.getTogether();
+		this.inputTime = request.getInputTime();
+	}
+
+	public TodoStatus setStatus(String status) {
+		if (status.equals("TODO")) {
+			return TodoStatus.TODO;
+		} else if (status.equals("IN_PROGRESS")) {
+			return TodoStatus.IN_PROGRESS;
+		} else {
+			return TodoStatus.DONE;
+		}
+	}
+
+	public void setInputTime(int inputTime) {
+		this.inputTime = inputTime;
+	}
+
+	public void updateTodoDate(LocalDateTime start, LocalDateTime end) {
+		this.start = start;
+		this.end = end;
 	}
 }

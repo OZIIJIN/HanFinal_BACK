@@ -20,7 +20,7 @@ import org.springframework.util.ResourceUtils;
 @Configuration
 public class FirebaseConfig {
 
-	@Value("${firebase.key-path}")
+	@Value("${FIREBASE_KEY_PATH}")
 	String fcmKeyPath;
 
 	@Bean

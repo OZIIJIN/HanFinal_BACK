@@ -25,6 +25,7 @@ public class FirebaseConfig {
 
 	@Bean
 	public FirebaseApp firebaseApp() throws IOException {
+		System.out.println("FIREBASE_KEY_PATH: " + System.getenv("FIREBASE_KEY_PATH"));
 
 		InputStream refreshToken = new ClassPathResource(fcmKeyPath).getInputStream();
 

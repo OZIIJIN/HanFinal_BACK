@@ -20,19 +20,19 @@ import org.springframework.util.ResourceUtils;
 @Configuration
 public class FirebaseConfig {
 
-	@Value("${firebase.key-path}")
+	@Value("${FIREBASE_KEY_PATH}")
 	String fcmKeyPath;
 
 	@Bean
 	public FirebaseApp firebaseApp() throws IOException {
 		System.out.println("FIREBASE_KEY_PATH: " + System.getenv("FIREBASE_KEY_PATH"));
 
-		InputStream refreshToken = new ClassPathResource(fcmKeyPath).getInputStream();
+		FileInputStream serviceAccount = new FileInputStream(fcmKeyPath);
 
-		FirebaseOptions options = FirebaseOptions
-			.builder()
-			.setCredentials(GoogleCredentials.fromStream(refreshToken))
+		FirebaseOptions options = FirebaseOptions.builder()
+			.setCredentials(GoogleCredentials.fromStream(serviceAccount))
 			.build();
+
 		return FirebaseApp.initializeApp(options);
 	}
 	@Bean

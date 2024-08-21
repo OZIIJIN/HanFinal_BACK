@@ -4,11 +4,7 @@ import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.onesentence.onesentence.domain.todo.dto.AvailableTimeSlots;
-import org.onesentence.onesentence.domain.todo.dto.TodoInputTimeRequest;
-import org.onesentence.onesentence.domain.todo.dto.TodoRequest;
-import org.onesentence.onesentence.domain.todo.dto.TodoResponse;
-import org.onesentence.onesentence.domain.todo.dto.TodoStatusRequest;
+import org.onesentence.onesentence.domain.todo.dto.*;
 import org.onesentence.onesentence.domain.todo.entity.TodoStatus;
 import org.onesentence.onesentence.domain.todo.service.TodoService;
 import org.quartz.SchedulerException;
@@ -30,11 +26,11 @@ public class TodoController {
 		return ResponseEntity.created(URI.create("/api/v1/todos/" + todoId)).build();
 	}
 
-	@PostMapping("/coordination")
-	public ResponseEntity<Void> coordinateTodo(@RequestBody TodoRequest request,
-		@RequestAttribute("userId") Long userId) throws SchedulerException {
+	@GetMapping("/{todoId}/coordination")
+	public ResponseEntity<Void> coordinateTodo(@RequestAttribute("userId") Long userId,
+		@PathVariable Long todoId) throws SchedulerException {
 
-		todoService.coordinateTodo(request, userId);
+		todoService.coordinateTodo(todoId, userId);
 
 		return ResponseEntity.ok().build();
 	}
@@ -112,7 +108,8 @@ public class TodoController {
 	}
 
 	@GetMapping("/priorities")
-	public ResponseEntity<List<TodoResponse>> getPriorities(@RequestAttribute("userId") Long userId) {
+	public ResponseEntity<List<TodoResponse>> getPriorities(
+		@RequestAttribute("userId") Long userId) {
 		List<TodoResponse> priorities = todoService.getPriorities(userId);
 
 		return ResponseEntity.ok().body(priorities);

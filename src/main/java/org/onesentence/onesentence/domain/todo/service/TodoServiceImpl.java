@@ -255,14 +255,12 @@ public class TodoServiceImpl implements TodoService {
 	}
 
 	@Override
-	@Transactional
-	public void coordinateTodo(TodoRequest request, Long userId) throws SchedulerException {
+	@Transactional(readOnly = true)
+	public void coordinateTodo(Long todoId, Long userId) throws SchedulerException {
 
 		User user = findUserByUserId(userId);
 
-		Todo todo = new Todo(request, user.getId());
-
-		Todo savedTodo = todoJpaRepository.save(todo);
+		Todo savedTodo = findById(todoId);
 
 		schedulerService.setScheduler(savedTodo.getStart(), user.getFcmToken(),
 			savedTodo.getTitle(), savedTodo.getId());
@@ -304,7 +302,7 @@ public class TodoServiceImpl implements TodoService {
 
 		List<String> availableTimeSlots = new ArrayList<>();
 
-		int inputTimeMinutes = targetTodo.getInputTime();
+		int inputTimeMinutes = targetTodo.getInputTime()*60;
 
 		LocalDateTime lastEndTime = startDate;
 
@@ -356,7 +354,7 @@ public class TodoServiceImpl implements TodoService {
 		// 해당 시간대에 일정이 겹치는지 확인
 		List<Todo> todos = todoQuery.checkTimeSlots(todo.getUserId(), date);
 
-		LocalDateTime endTimeSlot = date.plusMinutes(todo.getInputTime());
+		LocalDateTime endTimeSlot = date.plusMinutes(todo.getInputTime()*60);
 
 		for (Todo t : todos) {
 			if ((!date.isBefore(todo.getStart()) && !date.isAfter(todo.getEnd()))
@@ -382,7 +380,7 @@ public class TodoServiceImpl implements TodoService {
 
 			ChatTypeMessage chatTypeMessageTrue = ChatTypeMessage.builder()
 				.label("message")
-				.message("일정이 확정되었습니다.")
+				.message(dateConvertToString(todo.getStart())+"로 일정이 확정되었습니다.")
 				.build();
 
 			log.info("채팅 사용자 입력 시간으로 일정 확정");
@@ -395,7 +393,7 @@ public class TodoServiceImpl implements TodoService {
 	public void updateTodoDate(Long todoId, LocalDateTime start) {
 		Todo todo = findById(todoId);
 
-		LocalDateTime end = start.plusMinutes(todo.getInputTime());
+		LocalDateTime end = start.plusMinutes(todo.getInputTime()*60);
 
 		log.info(start + "/" + end + "일정 확정");
 
@@ -404,7 +402,7 @@ public class TodoServiceImpl implements TodoService {
 
 	private String dateConvertToString(LocalDateTime localDateTime) {
 		// DateTimeFormatter 생성 (한국어 로케일 사용)
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일 a h시 m분",
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일 a h시 mm분",
 			Locale.KOREAN);
 
 		// LocalDateTime을 문자열로 포맷

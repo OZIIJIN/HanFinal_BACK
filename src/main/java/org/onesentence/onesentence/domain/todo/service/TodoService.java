@@ -36,7 +36,7 @@ public interface TodoService {
 
 	Long setInputTime(Long todoId, TodoInputTimeRequest request, Long userId);
 
-	void coordinateTodo(TodoRequest request, Long userId) throws SchedulerException;
+	void coordinateTodo(Long todoId, Long userId) throws SchedulerException;
 
 	List<TodoDate> getTodoDatesByUserId(Long todoId);
 

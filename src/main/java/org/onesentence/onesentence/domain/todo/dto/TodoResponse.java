@@ -1,6 +1,7 @@
 package org.onesentence.onesentence.domain.todo.dto;
 
 import java.time.LocalDateTime;
+import kotlin.collections.DoubleIterator;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.onesentence.onesentence.domain.todo.entity.Path;
@@ -27,6 +28,8 @@ public class TodoResponse {
 
 	private String together;
 
+	private int inputTime;
+
 	public static TodoResponse from(Todo todo) {
 		return new TodoResponse(
 			todo.getId(),
@@ -36,7 +39,8 @@ public class TodoResponse {
 			todo.getCategory(),
 			todo.getStatus(),
 			todo.getLocation(),
-			todo.getTogether()
+			todo.getTogether(),
+			todo.getInputTime()
 		);
 	}
 }

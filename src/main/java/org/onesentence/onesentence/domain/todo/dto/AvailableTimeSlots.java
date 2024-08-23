@@ -21,9 +21,9 @@ public class AvailableTimeSlots {
 
 	public AvailableTimeSlots (List<String> availableTimeSlots) {
 		this.label = "date";
-		this.start1 = availableTimeSlots.get(0);
-		this.start2 = availableTimeSlots.get(1);
-		this.start3 = availableTimeSlots.get(2);
+		this.start1 = availableTimeSlots.size() > 0 ? availableTimeSlots.get(0) : null;
+		this.start2 = availableTimeSlots.size() > 1 ? availableTimeSlots.get(1) : null;
+		this.start3 = availableTimeSlots.size() > 2 ? availableTimeSlots.get(2) : null;
 	}
 
 }

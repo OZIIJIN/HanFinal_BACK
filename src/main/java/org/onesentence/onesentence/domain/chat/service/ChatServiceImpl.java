@@ -1,6 +1,8 @@
 package org.onesentence.onesentence.domain.chat.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.firebase.messaging.FirebaseMessagingException;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
@@ -44,7 +46,7 @@ public class ChatServiceImpl implements ChatService {
 	}
 
 	@Override
-	public void chat(ChatMessage message) throws JsonProcessingException {
+	public void chat(ChatMessage message) throws IOException, FirebaseMessagingException {
 
 		if (message.getType().equals("yesorno")) {
 			chatJpaRepository.save(new Chat(message, ChatType.YESORNO));

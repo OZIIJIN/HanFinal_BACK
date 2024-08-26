@@ -47,7 +47,8 @@ public interface TodoService {
 
 	AvailableTimeSlots findAvailableTimeSlots(Long todoId);
 
-	void checkTimeSlotsAndUpdateTodo(Long todoId, LocalDateTime date);
+	void checkTimeSlotsAndUpdateTodo(Long todoId, LocalDateTime date)
+		throws IOException, FirebaseMessagingException;
 
 	void updateTodoDate(Long todoId, LocalDateTime start);
 }

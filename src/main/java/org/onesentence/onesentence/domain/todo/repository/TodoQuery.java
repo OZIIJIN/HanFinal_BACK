@@ -25,4 +25,6 @@ public interface TodoQuery {
 	List<TodoDate> getTodoDatesByUserId(Long userId);
 
 	List<Todo> checkTimeSlots(Long userId, LocalDateTime date);
+
+	List<Todo> findOverlappingTodos(Long userId, LocalDateTime startTime, LocalDateTime endTime);
 }

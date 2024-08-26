@@ -51,4 +51,6 @@ public interface TodoService {
 		throws IOException, FirebaseMessagingException;
 
 	void updateTodoDate(Long todoId, LocalDateTime start);
+
+	String findRecommendedTimeSlot(Todo targetTodo);
 }

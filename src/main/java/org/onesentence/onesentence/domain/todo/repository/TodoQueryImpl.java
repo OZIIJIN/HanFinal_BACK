@@ -8,7 +8,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.onesentence.onesentence.domain.todo.dto.TodoDate;
 import org.onesentence.onesentence.domain.todo.dto.TodoPriority;
@@ -30,7 +29,8 @@ public class TodoQueryImpl implements TodoQuery {
 		NumberTemplate<Integer> durationInMinutes = Expressions.numberTemplate(Integer.class,
 			"TIMESTAMPDIFF(DAY, {0}, {1})", todo.start, todo.end);
 
-		NumberTemplate<Double> urgency = Expressions.numberTemplate(Double.class, "1.0 / ({0} + 1.0)",
+		NumberTemplate<Double> urgency = Expressions.numberTemplate(Double.class,
+			"1.0 / ({0} + 1.0)",
 			durationInMinutes);
 
 		NumberTemplate<Double> importance = Expressions.numberTemplate(Double.class,
@@ -141,6 +141,20 @@ public class TodoQueryImpl implements TodoQuery {
 				.and(todo.start.between(
 					targetDate.atStartOfDay(),
 					targetDate.atTime(23, 59, 59))))
+			.fetch();
+	}
+
+	@Override
+	public List<Todo> findOverlappingTodos(Long userId, LocalDateTime startTime,
+		LocalDateTime endTime) {
+		QTodo todo = QTodo.todo;
+
+		return jpaQueryFactory.selectFrom(todo)
+			.where(
+				todo.userId.eq(userId)
+					.and(todo.start.lt(endTime))   // 시작 시간이 endTime보다 작아야 겹침
+					.and(todo.end.gt(startTime))   // 종료 시간이 startTime보다 커야 겹침
+			)
 			.fetch();
 	}
 

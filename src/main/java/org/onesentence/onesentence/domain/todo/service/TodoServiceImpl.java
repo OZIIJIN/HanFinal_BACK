@@ -11,7 +11,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.onesentence.onesentence.domain.chat.dto.ChatMessage;
 import org.onesentence.onesentence.domain.chat.dto.ChatTypeMessage;
 import org.onesentence.onesentence.domain.chat.dto.CoordinationMessage;
 import org.onesentence.onesentence.domain.dijkstra.model.Graph;
@@ -32,7 +31,6 @@ import org.onesentence.onesentence.global.WebSocketEventListener;
 import org.onesentence.onesentence.global.exception.ExceptionStatus;
 import org.onesentence.onesentence.global.exception.NotFoundException;
 import org.quartz.SchedulerException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -330,7 +328,7 @@ public class TodoServiceImpl implements TodoService {
 
 		List<String> availableTimeSlots = new ArrayList<>();
 
-		int inputTimeMinutes = targetTodo.getInputTime()*60;
+		int inputTimeMinutes = targetTodo.getInputTime() * 60;
 
 		LocalDateTime lastEndTime = startDate;
 
@@ -383,7 +381,7 @@ public class TodoServiceImpl implements TodoService {
 		// 해당 시간대에 일정이 겹치는지 확인
 		List<Todo> todos = todoQuery.checkTimeSlots(todo.getUserId(), date);
 
-		LocalDateTime endTimeSlot = date.plusMinutes(todo.getInputTime()*60);
+		LocalDateTime endTimeSlot = date.plusMinutes(todo.getInputTime() * 60);
 
 		for (Todo t : todos) {
 			if ((!date.isBefore(todo.getStart()) && !date.isAfter(todo.getEnd()))
@@ -409,7 +407,7 @@ public class TodoServiceImpl implements TodoService {
 
 			ChatTypeMessage chatTypeMessageTrue = ChatTypeMessage.builder()
 				.label("message")
-				.message(dateConvertToString(todo.getStart())+"로 일정이 확정되었습니다.")
+				.message(dateConvertToString(todo.getStart()) + "로 일정이 확정되었습니다.")
 				.build();
 
 			FCMSendDto fcmSendDto = FCMSendDto.builder()
@@ -429,7 +427,7 @@ public class TodoServiceImpl implements TodoService {
 	public void updateTodoDate(Long todoId, LocalDateTime start) {
 		Todo todo = findById(todoId);
 
-		LocalDateTime end = start.plusMinutes(todo.getInputTime()*60);
+		LocalDateTime end = start.plusMinutes(todo.getInputTime() * 60);
 
 		log.info(start + "/" + end + "일정 확정");
 
@@ -462,4 +460,64 @@ public class TodoServiceImpl implements TodoService {
 			);
 		}
 	}
+
+	@Transactional(readOnly = true)
+	public String findRecommendedTimeSlot(Todo targetTodo) {
+
+		// 기본 추천 시간: 일정 시작 시간 기준 다음 날 같은 시간
+		LocalDateTime recommendedStartTime = targetTodo.getStart().plusDays(1);
+		LocalDateTime recommendedEndTime = recommendedStartTime.plusMinutes(
+			targetTodo.getInputTime() * 60);
+
+		// 시간대 탐색 범위 설정 (다음 날 오전 10시부터 이틀 후 오후 9시까지)
+		LocalDate targetDate = recommendedStartTime.toLocalDate();
+		LocalDateTime startDate = targetDate.atTime(LocalTime.of(10, 0));
+		LocalDateTime endDate = targetDate.plusDays(2).atTime(LocalTime.of(21, 0));
+
+		// 1. JPA 레포지토리에서 다음 날 같은 시간에 일정이 있는지 확인
+		List<Todo> overlappingTodos = todoQuery.findOverlappingTodos(targetTodo.getUserId(),
+			recommendedStartTime, recommendedEndTime);
+
+		// 만약 일정이 겹치지 않으면 추가적으로 해당 시간대에서 소요 시간을 모두 사용할 수 있는지 확인
+		if (overlappingTodos.isEmpty()) {
+			// 해당 시간대 이후에 다른 일정이 있는지 확인
+			List<Todo> nextTodos = todoQuery.findOverlappingTodos(targetTodo.getUserId(),
+				recommendedEndTime, recommendedEndTime.plusMinutes(1));
+
+			// 만약 그 이후에 겹치는 일정이 없다면 해당 시간 반환
+			if (nextTodos.isEmpty()) {
+				return dateConvertToString(recommendedStartTime);
+			}
+		}
+
+		// 2. 만약 겹치는 일정이 있거나 소요 시간을 모두 사용할 수 없는 경우, 빈 시간대를 탐색
+		LocalDateTime lastEndTime = startDate;
+
+		List<Todo> todos = todoJpaRepository.findByUserIdAndStartBetween(targetTodo.getUserId(),
+			startDate, endDate);
+		List<Todo> sortedTodos = todos.stream()
+			.sorted(Comparator.comparing(Todo::getStart))
+			.toList();
+
+		for (Todo todo : sortedTodos) {
+			// 이전 일정의 종료 시간과 현재 일정의 시작 시간 사이에 빈 시간이 있는지 확인
+			while (lastEndTime.plusMinutes(targetTodo.getInputTime() * 60).isBefore(todo.getStart())
+				&& lastEndTime.getHour() < 21) {
+				// 빈 시간이 존재하는 경우 해당 시간 반환
+				return dateConvertToString(lastEndTime);
+			}
+			// 마지막 일정의 종료 시간을 업데이트
+			lastEndTime = todo.getEnd();
+		}
+
+		// 마지막 일정 이후의 빈 시간대 탐색
+		while (lastEndTime.plusMinutes(targetTodo.getInputTime() * 60).isBefore(endDate)
+			&& lastEndTime.getHour() < 21) {
+			return dateConvertToString(lastEndTime); // 첫 번째로 가능한 빈 시간을 반환
+		}
+
+		log.info("추천 가능한 빈 시간이 없습니다.");
+		return null; // 만약 빈 시간이 없을 경우 null 반환 (예외 처리 가능)
+	}
+
 }

@@ -8,6 +8,7 @@ import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.onesentence.onesentence.domain.fcm.dto.FCMSendDto;
+import org.onesentence.onesentence.domain.fcm.dto.FCMWeatherDto;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -31,6 +32,22 @@ public class FCMServiceImpl implements FCMService {
 
 		return firebaseMessaging.send(message);
 
+	}
+
+	@Override
+	public String sendWeatherPushTo(FCMWeatherDto fcmWeatherDto) throws FirebaseMessagingException {
+		Message message = Message.builder()
+			.setToken(fcmWeatherDto.getToken())
+			.setNotification(Notification.builder()
+				.setTitle(fcmWeatherDto.getTitle())
+				.setBody(fcmWeatherDto.getBody())
+				.build())
+			.putData("todoId", fcmWeatherDto.getTodoId().toString())
+			.putData("date", fcmWeatherDto.getDate())
+			.putData("type", fcmWeatherDto.getType())
+			.build();
+
+		return firebaseMessaging.send(message);
 	}
 
 	@Override

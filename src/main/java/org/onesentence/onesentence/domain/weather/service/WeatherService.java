@@ -10,9 +10,11 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.onesentence.onesentence.domain.fcm.dto.FCMSendDto;
+import org.onesentence.onesentence.domain.fcm.dto.FCMWeatherDto;
 import org.onesentence.onesentence.domain.fcm.service.FCMService;
 import org.onesentence.onesentence.domain.todo.entity.Todo;
 import org.onesentence.onesentence.domain.todo.repository.TodoJpaRepository;
+import org.onesentence.onesentence.domain.todo.service.TodoService;
 import org.onesentence.onesentence.domain.user.entity.User;
 import org.onesentence.onesentence.domain.user.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +34,7 @@ public class WeatherService {
 	private final TodoJpaRepository todoJpaRepository;
 	private final FCMService fcmService;
 	private final UserService userService;
+	private final TodoService todoService;
 
 	@Value("${weather.api.key}")
 	private String apiKey;
@@ -178,58 +181,45 @@ public class WeatherService {
 
 			for (Todo todo : todoPage.getContent()) {
 				User user = userService.findByUserId(todo.getUserId());
-				FCMSendDto fcmSendDto = createNotificationMessage(todo, user);
+				FCMWeatherDto fcmSendDto = createNotificationMessage(todo, user);
 				if (fcmSendDto != null) {
-					fcmService.sendMessageTo(fcmSendDto);
+					fcmService.sendWeatherPushTo(fcmSendDto);
 				}
 			}
 		}
 	}
 
-	private FCMSendDto createNotificationMessage(Todo todo, User user) throws Exception {
+	private FCMWeatherDto createNotificationMessage(Todo todo, User user) throws Exception {
 		String weatherForecast = procWeather(todo.getStart());
 		String today =
 			todo.getStart().getMonthValue() + "월 " + todo.getStart().getDayOfMonth() + "일에 ";
 
-		return switch (weatherForecast) {
-			case "1" -> FCMSendDto.builder()
+		String recommendDate = todoService.findRecommendedTimeSlot(todo);
+
+		String title;
+
+		switch (weatherForecast) {
+			case "1" -> title = today + " 비가 올 예정입니다.";
+			case "2" -> title = today + " 비와 눈이 올 예정입니다.";
+			case "3" -> title = today + " 눈이 올 예정입니다.";
+			case "5" -> title = today + " 빗방울이 떨어질 예정입니다.";
+			case "6" -> title = today + " 빗방울과 눈이 날릴 예정입니다.";
+			case "7" -> title = today + " 눈이 날릴 예정입니다.";
+			default -> title = null;
+		}
+
+		if (title != null) {
+			return FCMWeatherDto.builder()
 				.token(user.getFcmToken())
-				.title(today + "비가 올 예정입니다.")
+				.title(title)
 				.body("일정 변경을 원하시면 클릭하세요!")
 				.todoId(todo.getId())
+				.date(recommendDate)
+				.type("weather")
 				.build();
-			case "2" -> FCMSendDto.builder()
-				.token(user.getFcmToken())
-				.title(today + "비와 눈이 올 예정입니다.")
-				.body("일정 변경을 원하시면 클릭하세요!")
-				.todoId(todo.getId())
-				.build();
-			case "3" -> FCMSendDto.builder()
-				.token(user.getFcmToken())
-				.title(today + "눈이 올 예정입니다.")
-				.body("일정 변경을 원하시면 클릭하세요!")
-				.todoId(todo.getId())
-				.build();
-			case "5" -> FCMSendDto.builder()
-				.token(user.getFcmToken())
-				.title(today + "빗방울이 떨어질 예정입니다.")
-				.body("일정 변경을 원하시면 클릭하세요!")
-				.todoId(todo.getId())
-				.build();
-			case "6" -> FCMSendDto.builder()
-				.token(user.getFcmToken())
-				.title(today + "빗방울과 눈이 날릴 예정입니다.")
-				.body("일정 변경을 원하시면 클릭하세요!")
-				.todoId(todo.getId())
-				.build();
-			case "7" -> FCMSendDto.builder()
-				.token(user.getFcmToken())
-				.title(today + "눈이 날릴 예정입니다.")
-				.body("일정 변경을 원하시면 클릭하세요!")
-				.todoId(todo.getId())
-				.build();
-			default -> null;
-		};
+		} else {
+			return null;
+		}
 	}
 
 

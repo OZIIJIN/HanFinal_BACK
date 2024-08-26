@@ -423,6 +423,7 @@ public class TodoServiceImpl implements TodoService {
 	private void sendMessageWhenClientConnected(CoordinationMessage messageDto) {
 		// WebSocket에 연결된 사용자가 있는지 확인
 		boolean isConnected = !simpUserRegistry.getUsers().isEmpty();
+		log.info("Number of connected users: {}", simpUserRegistry.getUsers().size());
 
 		if (isConnected) {
 			// WebSocket에 누군가 연결되어 있는 경우 메시지를 전송

@@ -411,6 +411,11 @@ public class TodoServiceImpl implements TodoService {
 				.message(dateConvertToString(todo.getStart())+"로 일정이 확정되었습니다.")
 				.build();
 
+			FCMSendDto fcmSendDto = FCMSendDto.builder()
+				.token(user.getFcmToken())
+				.title("일정이 변경되었습니다.")
+				.build();
+
 			log.info("채팅 사용자 입력 시간으로 일정 확정");
 			simpMessagingTemplate.convertAndSend("/sub/chatroom/hanfinal", chatTypeMessageTrue);
 		}

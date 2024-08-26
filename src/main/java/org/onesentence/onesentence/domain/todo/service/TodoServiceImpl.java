@@ -1,5 +1,7 @@
 package org.onesentence.onesentence.domain.todo.service;
 
+import com.google.firebase.messaging.FirebaseMessagingException;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -15,6 +17,8 @@ import org.onesentence.onesentence.domain.chat.dto.CoordinationMessage;
 import org.onesentence.onesentence.domain.dijkstra.model.Graph;
 import org.onesentence.onesentence.domain.dijkstra.model.Node;
 import org.onesentence.onesentence.domain.dijkstra.service.DijkstraService;
+import org.onesentence.onesentence.domain.fcm.dto.FCMSendDto;
+import org.onesentence.onesentence.domain.fcm.service.FCMService;
 import org.onesentence.onesentence.domain.fcm.service.SchedulerService;
 import org.onesentence.onesentence.domain.gpt.dto.GPTCallTodoRequest;
 import org.onesentence.onesentence.domain.todo.dto.*;
@@ -49,6 +53,7 @@ public class TodoServiceImpl implements TodoService {
 	private final ThreadPoolTaskScheduler taskScheduler;
 	private final SimpUserRegistry simpUserRegistry;
 	private final WebSocketEventListener webSocketEventListener;
+	private final FCMService fcmService;
 
 	private ScheduledFuture<?> futureMessageTask;
 
@@ -230,7 +235,9 @@ public class TodoServiceImpl implements TodoService {
 
 	@Override
 	@Transactional
-	public Long createTodoByOneSentence(GPTCallTodoRequest gptCallTodoRequest, Long userId) {
+	public Long createTodoByOneSentence(GPTCallTodoRequest gptCallTodoRequest, Long userId)
+		throws IOException, FirebaseMessagingException {
+		User user = findUserByUserId(userId);
 
 		Todo todo = Todo.builder()
 			.title(gptCallTodoRequest.getTitle())
@@ -244,6 +251,14 @@ public class TodoServiceImpl implements TodoService {
 			.inputTime(gptCallTodoRequest.getInputTime())
 			.build();
 		Todo savedTodo = todoJpaRepository.save(todo);
+
+		FCMSendDto fcmSendDto = FCMSendDto.builder()
+			.token(user.getFcmToken())
+			.title("한 문장 등록 완료")
+			.todoId(savedTodo.getId())
+			.build();
+
+		fcmService.sendMessageTo(fcmSendDto);
 
 		return savedTodo.getId();
 	}

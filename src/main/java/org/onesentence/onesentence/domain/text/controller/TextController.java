@@ -1,6 +1,8 @@
 package org.onesentence.onesentence.domain.text.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.firebase.messaging.FirebaseMessagingException;
+import java.io.IOException;
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
 import org.onesentence.onesentence.domain.text.dto.TextRequest;
@@ -18,7 +20,7 @@ public class TextController {
 	@PostMapping
 	public ResponseEntity<String> createText(@RequestBody TextRequest request,
 		@RequestAttribute("userId") Long userId)
-		throws JsonProcessingException {
+		throws IOException, FirebaseMessagingException {
 
 		Long todoId = textService.createTodoByOneSentence(request, userId);
 

@@ -1,5 +1,7 @@
 package org.onesentence.onesentence.domain.todo.service;
 
+import com.google.firebase.messaging.FirebaseMessagingException;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,7 +34,8 @@ public interface TodoService {
 
 	List<TodoResponse> getPriorities(Long userId);
 
-	Long createTodoByOneSentence(GPTCallTodoRequest gptCallTodoRequest, Long userId);
+	Long createTodoByOneSentence(GPTCallTodoRequest gptCallTodoRequest, Long userId)
+		throws IOException, FirebaseMessagingException;
 
 	Long setInputTime(Long todoId, TodoInputTimeRequest request, Long userId);
 

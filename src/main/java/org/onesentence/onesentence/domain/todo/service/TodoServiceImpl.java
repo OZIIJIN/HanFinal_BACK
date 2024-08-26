@@ -284,7 +284,7 @@ public class TodoServiceImpl implements TodoService {
 
 		// 클라이언트가 연결되었는지 확인 후 메시지 전송
 		futureMessageTask = taskScheduler.schedule(() -> sendMessageWhenClientConnected(messageDto),
-			new Date(System.currentTimeMillis() + 5000)); // 5초 지연
+			new Date(System.currentTimeMillis() + 1000)); // 5초 지연
 	}
 
 	@Override
@@ -431,7 +431,7 @@ public class TodoServiceImpl implements TodoService {
 			// 아무도 연결되어 있지 않다면 일정 시간 후 다시 시도
 			futureMessageTask = taskScheduler.schedule(
 				() -> sendMessageWhenClientConnected(messageDto),
-				new Date(System.currentTimeMillis() + 5000)
+				new Date(System.currentTimeMillis() + 1000)
 			);
 		}
 	}

@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ScheduledFuture;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +27,10 @@ import org.onesentence.onesentence.domain.user.repository.UserJpaRepository;
 import org.onesentence.onesentence.global.exception.ExceptionStatus;
 import org.onesentence.onesentence.global.exception.NotFoundException;
 import org.quartz.SchedulerException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.user.SimpUserRegistry;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +45,10 @@ public class TodoServiceImpl implements TodoService {
 	private final UserJpaRepository userJpaRepository;
 	private final SchedulerService schedulerService;
 	private final SimpMessagingTemplate simpMessagingTemplate;
+	private final ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
+	private final SimpUserRegistry simpUserRegistry;
+
+	private ScheduledFuture<?> futureMessageTask;
 
 	private User findUserByUserId(Long userId) {
 		return userJpaRepository.findById(userId)
@@ -268,12 +276,14 @@ public class TodoServiceImpl implements TodoService {
 		CoordinationMessage messageDto = CoordinationMessage.builder()
 			.label("yesorno")
 			.todoId(savedTodo.getId())
-			.message("아래 일정을 조율하고자 합니다.")
+			.message(user.getNickName() + "님이 아래 일정을 조율하고자 합니다.")
 			.todoTitle(savedTodo.getTitle())
 			.start(dateConvertToString(savedTodo.getStart()))
 			.build();
 
-		simpMessagingTemplate.convertAndSend("/sub/chatroom/hanfinal", messageDto);
+		// 클라이언트가 연결되었는지 확인 후 메시지 전송
+		futureMessageTask = taskScheduler.schedule(() -> sendMessageWhenClientConnected(userId, messageDto),
+			new Date(System.currentTimeMillis() + 5000)); // 5초 지연
 	}
 
 	@Override
@@ -407,5 +417,16 @@ public class TodoServiceImpl implements TodoService {
 
 		// LocalDateTime을 문자열로 포맷
 		return localDateTime.format(formatter);
+	}
+
+	private void sendMessageWhenClientConnected(Long userId, CoordinationMessage messageDto) {
+		// WebSocket에 연결된 사용자가 있는지 확인
+		if (simpUserRegistry.getUser(userId.toString()) != null) {
+			simpMessagingTemplate.convertAndSend("/sub/chatroom/hanfinal", messageDto);
+		} else {
+			// 클라이언트가 아직 연결되지 않았으면 재시도 (예: 5초 후에 다시 시도)
+			futureMessageTask = taskScheduler.schedule(() -> sendMessageWhenClientConnected(userId, messageDto),
+				new Date(System.currentTimeMillis() + 5000));
+		}
 	}
 }

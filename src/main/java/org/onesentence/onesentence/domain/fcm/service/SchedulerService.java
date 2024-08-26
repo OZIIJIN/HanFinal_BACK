@@ -27,6 +27,7 @@ public class SchedulerService {
 		jobDataMap.put("todoTitle", todoTitle);
 		jobDataMap.put("todoId", todoId);
 
+		// TODO : identify 수정
 		JobDetail job = JobBuilder
 			.newJob(FcmJob.class)
 			.withIdentity("fcmPushJob_" + todoId, "fcmGroup")

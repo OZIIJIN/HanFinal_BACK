@@ -24,6 +24,7 @@ import org.onesentence.onesentence.domain.todo.repository.TodoJpaRepository;
 import org.onesentence.onesentence.domain.todo.repository.TodoQuery;
 import org.onesentence.onesentence.domain.user.entity.User;
 import org.onesentence.onesentence.domain.user.repository.UserJpaRepository;
+import org.onesentence.onesentence.global.WebSocketEventListener;
 import org.onesentence.onesentence.global.exception.ExceptionStatus;
 import org.onesentence.onesentence.global.exception.NotFoundException;
 import org.quartz.SchedulerException;
@@ -47,6 +48,7 @@ public class TodoServiceImpl implements TodoService {
 	private final SimpMessagingTemplate simpMessagingTemplate;
 	private final ThreadPoolTaskScheduler taskScheduler;
 	private final SimpUserRegistry simpUserRegistry;
+	private final WebSocketEventListener webSocketEventListener;
 
 	private ScheduledFuture<?> futureMessageTask;
 
@@ -422,10 +424,11 @@ public class TodoServiceImpl implements TodoService {
 
 	private void sendMessageWhenClientConnected(CoordinationMessage messageDto) {
 		// WebSocket에 연결된 사용자가 있는지 확인
-		boolean isConnected = !simpUserRegistry.getUsers().isEmpty();
+
+		int connectedUsersCount = webSocketEventListener.getConnectedUserCount();
 		log.info("Number of connected users: {}", simpUserRegistry.getUsers().size());
 
-		if (isConnected) {
+		if (connectedUsersCount != 0) {
 			// WebSocket에 누군가 연결되어 있는 경우 메시지를 전송
 			simpMessagingTemplate.convertAndSend("/sub/chatroom/hanfinal", messageDto);
 		} else {

@@ -1,6 +1,8 @@
 package org.onesentence.onesentence.domain.chat.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.firebase.messaging.FirebaseMessagingException;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.onesentence.onesentence.domain.chat.dto.ChatMessage;
 import org.onesentence.onesentence.domain.chat.dto.ChatRoomResponse;
@@ -25,7 +27,7 @@ public class ChatController {
 	}
 
 	@MessageMapping("/chatroom/hanfinal")
-	public void chat (ChatMessage message) throws JsonProcessingException {
+	public void chat (ChatMessage message) throws IOException, FirebaseMessagingException {
 
 		chatService.chat(message);
 	}

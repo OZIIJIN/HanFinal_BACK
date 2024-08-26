@@ -374,7 +374,8 @@ public class TodoServiceImpl implements TodoService {
 
 	@Override
 	@Transactional
-	public void checkTimeSlotsAndUpdateTodo(Long todoId, LocalDateTime date) {
+	public void checkTimeSlotsAndUpdateTodo(Long todoId, LocalDateTime date)
+		throws IOException, FirebaseMessagingException {
 		boolean isPossibleToUpdate = true;
 		Todo todo = findById(todoId);
 		User user = findUserByUserId(todo.getUserId());
@@ -410,6 +411,13 @@ public class TodoServiceImpl implements TodoService {
 				.label("message")
 				.message(dateConvertToString(todo.getStart())+"로 일정이 확정되었습니다.")
 				.build();
+
+			FCMSendDto fcmSendDto = FCMSendDto.builder()
+				.token(user.getFcmToken())
+				.title("일정이 변경되었습니다.")
+				.build();
+
+			fcmService.sendMessageTo(fcmSendDto);
 
 			log.info("채팅 사용자 입력 시간으로 일정 확정");
 			simpMessagingTemplate.convertAndSend("/sub/chatroom/hanfinal", chatTypeMessageTrue);

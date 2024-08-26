@@ -45,7 +45,7 @@ public class TodoServiceImpl implements TodoService {
 	private final UserJpaRepository userJpaRepository;
 	private final SchedulerService schedulerService;
 	private final SimpMessagingTemplate simpMessagingTemplate;
-	private final ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
+	private final ThreadPoolTaskScheduler taskScheduler;
 	private final SimpUserRegistry simpUserRegistry;
 
 	private ScheduledFuture<?> futureMessageTask;

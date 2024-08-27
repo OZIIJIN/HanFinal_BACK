@@ -53,4 +53,6 @@ public interface TodoService {
 	void updateTodoDate(Long todoId, LocalDateTime start);
 
 	String findRecommendedTimeSlot(Todo targetTodo);
+
+	String dateConvertToString(LocalDateTime localDateTime);
 }

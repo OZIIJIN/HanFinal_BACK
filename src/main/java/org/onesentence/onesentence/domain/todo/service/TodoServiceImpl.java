@@ -434,7 +434,7 @@ public class TodoServiceImpl implements TodoService {
 		todo.updateTodoDate(start, end);
 	}
 
-	private String dateConvertToString(LocalDateTime localDateTime) {
+	public String dateConvertToString(LocalDateTime localDateTime) {
 		// DateTimeFormatter 생성 (한국어 로케일 사용)
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일 a h시 mm분",
 			Locale.KOREAN);

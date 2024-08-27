@@ -233,7 +233,7 @@ public class WeatherService {
 
 		FCMWeatherDto fcmWeatherDto = FCMWeatherDto.builder()
 			.token(user.getFcmToken())
-			.title(todo.getStart() + " 비가 올 예정입니다.")
+			.title(todoService.dateConvertToString(todo.getStart()) + "에 비가 올 예정입니다.")
 			.body("일정 변경을 원하시면 클릭하세요!")
 			.type("weather")
 			.date(recommendDate)

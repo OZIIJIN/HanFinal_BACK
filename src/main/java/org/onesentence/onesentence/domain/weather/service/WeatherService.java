@@ -1,5 +1,6 @@
 package org.onesentence.onesentence.domain.weather.service;
 
+import com.google.firebase.messaging.FirebaseMessagingException;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -216,10 +217,34 @@ public class WeatherService {
 				.todoId(todo.getId())
 				.date(recommendDate)
 				.type("weather")
+				.todoTitle(todo.getTitle())
 				.build();
 		} else {
 			return null;
 		}
+	}
+
+	public FCMWeatherDto test(Long todoId) throws FirebaseMessagingException {
+
+		Todo todo = todoService.findById(todoId);
+		User user = userService.findByUserId(todo.getUserId());
+
+		String recommendDate = todoService.findRecommendedTimeSlot(todo);
+
+		FCMWeatherDto fcmWeatherDto = FCMWeatherDto.builder()
+			.token(user.getFcmToken())
+			.title(todo.getStart() + " 비가 올 예정입니다.")
+			.body("일정 변경을 원하시면 클릭하세요!")
+			.type("weather")
+			.date(recommendDate)
+			.todoTitle(todo.getTitle())
+			.todoId(todo.getId())
+			.build();
+
+		log.info("추천 날짜 : " + recommendDate);
+		fcmService.sendWeatherPushTo(fcmWeatherDto);
+
+		return fcmWeatherDto;
 	}
 
 

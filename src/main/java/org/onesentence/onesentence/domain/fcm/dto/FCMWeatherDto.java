@@ -21,13 +21,17 @@ public class FCMWeatherDto {
 
 	private String type;
 
-	public FCMWeatherDto(String token, String title, String body, Long todoId, String date, String type) {
+	private String todoTitle;
+
+	public FCMWeatherDto(String token, String title, String body, Long todoId, String date,
+		String type, String todoTitle) {
 		this.token = token;
 		this.title = title;
 		this.body = body;
 		this.todoId = todoId;
 		this.date = date;
 		this.type = type;
+		this.todoTitle = todoTitle;
 	}
 
 }

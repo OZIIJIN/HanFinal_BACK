@@ -35,7 +35,7 @@ public class FCMServiceImpl implements FCMService {
 	}
 
 	@Override
-	public String sendWeatherPushTo(FCMWeatherDto fcmWeatherDto) throws FirebaseMessagingException {
+	public void sendWeatherPushTo(FCMWeatherDto fcmWeatherDto) throws FirebaseMessagingException {
 		Message message = Message.builder()
 			.setToken(fcmWeatherDto.getToken())
 			.setNotification(Notification.builder()
@@ -45,9 +45,10 @@ public class FCMServiceImpl implements FCMService {
 			.putData("todoId", fcmWeatherDto.getTodoId().toString())
 			.putData("date", fcmWeatherDto.getDate())
 			.putData("type", fcmWeatherDto.getType())
+			.putData("todoTitle", fcmWeatherDto.getTodoTitle())
 			.build();
 
-		return firebaseMessaging.send(message);
+		firebaseMessaging.send(message);
 	}
 
 	@Override

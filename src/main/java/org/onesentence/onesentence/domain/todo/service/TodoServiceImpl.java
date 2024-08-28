@@ -412,7 +412,8 @@ public class TodoServiceImpl implements TodoService {
 
 			FCMSendDto fcmSendDto = FCMSendDto.builder()
 				.token(user.getFcmToken())
-				.title("일정이 변경되었습니다.")
+				.title("한끝봇에 의해 일정이 조율되었습니다!")
+				.todoId(todoId)
 				.build();
 
 			fcmService.sendMessageTo(fcmSendDto);

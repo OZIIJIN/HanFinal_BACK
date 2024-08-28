@@ -443,6 +443,18 @@ public class TodoServiceImpl implements TodoService {
 		return localDateTime.format(formatter);
 	}
 
+	@Override
+	@Transactional
+	public void updateTodoByPush(TodoPushUpdateRequest request, Long todoId, Long userId) {
+
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일 a h시 m분", Locale.KOREAN);
+
+		LocalDateTime dateTime = LocalDateTime.parse(request.getDate(), formatter);
+
+		updateTodoDate(todoId, dateTime);
+
+	}
+
 	private void sendMessageWhenClientConnected(CoordinationMessage messageDto) {
 		// WebSocket에 연결된 사용자가 있는지 확인
 

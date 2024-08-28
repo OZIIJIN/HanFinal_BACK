@@ -121,4 +121,13 @@ public class TodoController {
 
 		return ResponseEntity.ok().body(result);
 	}
+
+	@PutMapping("/{todoId}/push-update")
+	public ResponseEntity<String> updateTodoByPush(@RequestBody TodoPushUpdateRequest request,
+		@PathVariable Long todoId, @RequestAttribute("userId") Long userId) {
+
+		todoService.updateTodoByPush(request, todoId, userId);
+
+		return ResponseEntity.ok().build();
+	}
 }

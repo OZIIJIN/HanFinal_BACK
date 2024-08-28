@@ -55,4 +55,6 @@ public interface TodoService {
 	String findRecommendedTimeSlot(Todo targetTodo);
 
 	String dateConvertToString(LocalDateTime localDateTime);
+
+	void updateTodoByPush(TodoPushUpdateRequest request, Long todoId, Long userId);
 }

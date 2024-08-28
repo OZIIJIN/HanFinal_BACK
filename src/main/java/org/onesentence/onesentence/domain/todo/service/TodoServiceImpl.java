@@ -407,12 +407,14 @@ public class TodoServiceImpl implements TodoService {
 
 			ChatTypeMessage chatTypeMessageTrue = ChatTypeMessage.builder()
 				.label("message")
-				.message(dateConvertToString(todo.getStart()) + "로 일정이 확정되었습니다.")
+				.message(dateConvertToString(todo.getStart()) + " 으로 일정이 확정되었습니다.")
 				.build();
 
 			FCMSendDto fcmSendDto = FCMSendDto.builder()
 				.token(user.getFcmToken())
 				.title("한끝봇에 의해 일정이 조율되었습니다!")
+				.body("[" + todo.getTitle() + "] " + dateConvertToString(todo.getStart())
+					+ " 으로 일정이 변경되었습니다.")
 				.todoId(todoId)
 				.build();
 
@@ -448,7 +450,8 @@ public class TodoServiceImpl implements TodoService {
 	@Transactional
 	public void updateTodoByPush(TodoPushUpdateRequest request, Long todoId, Long userId) {
 
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일 a h시 m분", Locale.KOREAN);
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일 a h시 m분",
+			Locale.KOREAN);
 
 		LocalDateTime dateTime = LocalDateTime.parse(request.getDate(), formatter);
 

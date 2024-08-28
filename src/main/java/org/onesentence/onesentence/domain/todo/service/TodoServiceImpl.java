@@ -252,7 +252,8 @@ public class TodoServiceImpl implements TodoService {
 
 		FCMSendDto fcmSendDto = FCMSendDto.builder()
 			.token(user.getFcmToken())
-			.title("한 문장 등록 완료")
+			.title("일정 등록 완료!")
+			.body("[" + todo.getTitle() + "] 일정이 등록되었습니다.")
 			.todoId(savedTodo.getId())
 			.build();
 

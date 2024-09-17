@@ -431,7 +431,7 @@ public class TodoServiceImpl implements TodoService {
 	}
 
 	@Override
-	@Transactional(readOnly = true)
+	@Transactional
 	public void updateTodoDate(Long todoId, LocalDateTime start) {
 		Todo todo = findById(todoId);
 

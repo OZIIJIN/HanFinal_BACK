@@ -26,32 +26,37 @@ public class TodoQueryImpl implements TodoQuery {
 	public List<TodoPriority> calculatePriority(Long userId) {
 		QTodo todo = QTodo.todo;
 
+		// 일정의 시작 시간과 종료 시간 사이의 일(day) 단위 차이를 계산합니다.
 		NumberTemplate<Integer> durationInMinutes = Expressions.numberTemplate(Integer.class,
 			"TIMESTAMPDIFF(DAY, {0}, {1})", todo.start, todo.end);
 
+		// 긴급도를 계산합니다. 일정 기간이 짧을수록 긴급도가 높아집니다.
 		NumberTemplate<Double> urgency = Expressions.numberTemplate(Double.class,
 			"1.0 / ({0} + 1.0)",
 			durationInMinutes);
 
+		// 중요도를 계산합니다. 소요 시간을 로그 함수로 변환하여 증가율이 점차 줄어들도록 합니다.
 		NumberTemplate<Double> importance = Expressions.numberTemplate(Double.class,
 			"ROUND(LOG({0} + 1), 1)", todo.inputTime);
 
+		// 일정의 시작 시간과 현재 시간 사이의 경과 시간을 계산합니다. 최소값은 0입니다.
 		NumberTemplate<Integer> progressTime = Expressions.numberTemplate(Integer.class,
 			"GREATEST(TIMESTAMPDIFF(DAY, {0}, CURRENT_TIMESTAMP), 0)", todo.start);
 
+		// 긴급도, 중요도, 경과 시간을 가중치로 계산하여 우선순위 점수를 산출합니다.
 		NumberTemplate<Double> priorityScore = Expressions.numberTemplate(Double.class,
 			"ROUND(2 * {0} + 1 * {1} + 0.5 * {2}, 1)", urgency, importance, progressTime);
 
 		return jpaQueryFactory
 			.select(Projections.constructor(TodoPriority.class,
 				todo.id.as("todoId"),
-				priorityScore))
-			.from(todo)
-			.where(todo.status.eq(TodoStatus.TODO)
-				.or(todo.status.eq(TodoStatus.IN_PROGRESS))
-				.and(todo.together.isNull())
-				.and(todo.userId.eq(userId)))
-			.fetch();
+				priorityScore))  // TodoPriority 객체를 생성할 때 사용될 필드들을 선택합니다.
+			.from(todo)  // 'todo' 테이블을 대상으로 합니다.
+			.where(todo.status.eq(TodoStatus.TODO)  // 'TODO' 상태의 일정이거나
+				.or(todo.status.eq(TodoStatus.IN_PROGRESS))  // 'IN_PROGRESS' 상태의 일정이어야 하며
+				.and(todo.together.isNull())  // 함께할 사람이 지정되지 않은 일정이어야 하고
+				.and(todo.userId.eq(userId)))  // 주어진 userId와 일치하는 일정이어야 합니다.
+			.fetch();  // 조건에 맞는 결과를 가져옵니다.
 	}
 
 	@Override

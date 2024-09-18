@@ -16,6 +16,8 @@ import org.onesentence.onesentence.domain.chat.entity.ChatRoom;
 import org.onesentence.onesentence.domain.chat.entity.ChatType;
 import org.onesentence.onesentence.domain.chat.repository.ChatJpaRepository;
 import org.onesentence.onesentence.domain.chat.repository.ChatRoomJpaRepository;
+import org.onesentence.onesentence.domain.fcm.dto.FCMSendDto;
+import org.onesentence.onesentence.domain.fcm.service.FCMService;
 import org.onesentence.onesentence.domain.gpt.dto.GPTAnalyzeResponse;
 import org.onesentence.onesentence.domain.gpt.service.GptService;
 import org.onesentence.onesentence.domain.todo.dto.AvailableTimeSlots;
@@ -34,6 +36,7 @@ public class ChatServiceImpl implements ChatService {
 	private final ChatJpaRepository chatJpaRepository;
 	private final TodoService todoService;
 	private final GptService gptService;
+	private final FCMService fcmService;
 	private final SimpMessagingTemplate simpMessagingTemplate;
 
 	@Override
@@ -73,6 +76,7 @@ public class ChatServiceImpl implements ChatService {
 
 				// 채팅방에 일정 확정 메시지를 전송
 				simpMessagingTemplate.convertAndSend("/sub/chatroom/hanfinal", chatTypeMessage);
+				fcmService.sendNoChangeTo(message);
 			}
 
 			// "date" 타입의 메시지인 경우
@@ -97,7 +101,7 @@ public class ChatServiceImpl implements ChatService {
 				.build();
 
 			simpMessagingTemplate.convertAndSend("/sub/chatroom/hanfinal", chatTypeMessage);
-
+			fcmService.sendCoordinationTo(message);
 			// "gpt" 타입의 메시지인 경우
 		} else if (message.getType().equals("gpt")) {
 			// GPT로 분석 요청 후 필요한 작업을 수행

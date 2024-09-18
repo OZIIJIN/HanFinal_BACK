@@ -7,8 +7,13 @@ import com.google.firebase.messaging.Notification;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.onesentence.onesentence.domain.chat.dto.ChatMessage;
 import org.onesentence.onesentence.domain.fcm.dto.FCMSendDto;
 import org.onesentence.onesentence.domain.fcm.dto.FCMWeatherDto;
+import org.onesentence.onesentence.domain.todo.entity.Todo;
+import org.onesentence.onesentence.domain.todo.service.TodoService;
+import org.onesentence.onesentence.domain.user.entity.User;
+import org.onesentence.onesentence.domain.user.service.UserService;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -17,6 +22,8 @@ import org.springframework.stereotype.Service;
 public class FCMServiceImpl implements FCMService {
 
 	private final FirebaseMessaging firebaseMessaging;
+	private final TodoService todoService;
+	private final UserService userService;
 
 	@Override
 	public String sendMessageTo(FCMSendDto fcmSendDto) throws IOException, FirebaseMessagingException {
@@ -54,5 +61,41 @@ public class FCMServiceImpl implements FCMService {
 	@Override
 	public void test(String test) {
 		log.info(test);
+	}
+
+	@Override
+	public void sendCoordinationTo(ChatMessage chatMessage) throws FirebaseMessagingException {
+		Todo todo = todoService.findById(chatMessage.getTodoId());
+		User user = userService.findByUserId(todo.getUserId());
+
+		Message message = Message.builder()
+			.setToken(user.getFcmToken())
+			.setNotification(Notification.builder()
+				.setTitle("한끝봇에 의해 일정이 조율되었습니다!")
+				.setBody("[" + todo.getTitle() + "] " + todoService.dateConvertToString(todo.getStart())
+					+ " 으로 일정이 변경되었습니다.")
+				.build())
+			.putData("todoId", todo.getId().toString())
+			.build();
+
+		firebaseMessaging.send(message);
+	}
+
+	@Override
+	public void sendNoChangeTo(ChatMessage chatMessage) throws FirebaseMessagingException {
+		Todo todo = todoService.findById(chatMessage.getTodoId());
+		User user = userService.findByUserId(todo.getUserId());
+
+		Message message = Message.builder()
+			.setToken(user.getFcmToken())
+			.setNotification(Notification.builder()
+				.setTitle("한끝봇에 의해 일정이 조율되었습니다!")
+				.setBody("[" + todo.getTitle() + "] " + todoService.dateConvertToString(todo.getStart())
+					+ " 으로 기존 일정대로 확정되었습니다.")
+				.build())
+			.putData("todoId", todo.getId().toString())
+			.build();
+
+		firebaseMessaging.send(message);
 	}
 }

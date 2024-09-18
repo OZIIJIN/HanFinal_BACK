@@ -23,4 +23,16 @@ public class GPTCallTodoRequest {
 	private String together;
 
 	private Integer inputTime;
+
+	public void setInputTime(int time) {
+		this.inputTime = time;
+	}
+
+	public void setStart(LocalDateTime start) {
+		this.start = start;
+	}
+
+	public void setEnd(LocalDateTime end) {
+		this.end = end;
+	}
 }

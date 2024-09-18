@@ -237,8 +237,15 @@ public class TodoServiceImpl implements TodoService {
 		throws IOException, FirebaseMessagingException {
 		User user = findUserByUserId(userId);
 
-		if(gptCallTodoRequest.getInputTime().equals(null)) {
-
+		if (gptCallTodoRequest.getInputTime()==null || gptCallTodoRequest.getInputTime()==0) {
+			gptCallTodoRequest.setInputTime(1);
+		}
+		if (gptCallTodoRequest.getStart()==null) {
+			gptCallTodoRequest.setStart(LocalDateTime.now());
+		}
+		if (gptCallTodoRequest.getEnd()==null) {
+			gptCallTodoRequest.setEnd(
+				gptCallTodoRequest.getStart().plusMinutes(60L * gptCallTodoRequest.getInputTime()));
 		}
 
 		Todo todo = Todo.builder()

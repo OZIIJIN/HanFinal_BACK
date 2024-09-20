@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.onesentence.onesentence.domain.todo.dto.TodoDate;
 import org.onesentence.onesentence.domain.todo.dto.TodoPriority;
+import org.onesentence.onesentence.domain.todo.dto.TodoStatistics;
 import org.onesentence.onesentence.domain.todo.entity.Todo;
 import org.onesentence.onesentence.domain.todo.entity.TodoStatus;
 
@@ -27,4 +28,6 @@ public interface TodoQuery {
 	List<Todo> checkTimeSlots(Long userId, LocalDateTime date);
 
 	List<Todo> findOverlappingTodos(Long userId, LocalDateTime startTime, LocalDateTime endTime);
+
+	int getStatistics(Long userId);
 }

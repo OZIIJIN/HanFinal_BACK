@@ -471,6 +471,16 @@ public class TodoServiceImpl implements TodoService {
 
 	}
 
+	@Override
+	@Transactional(readOnly = true)
+	public TodoStatistics getStatistics(Long userId) {
+		User user = findUserByUserId(userId);
+
+		int statistics = todoQuery.getStatistics(user.getId());
+
+		return new TodoStatistics(statistics);
+	}
+
 	private void sendMessageWhenClientConnected(CoordinationMessage messageDto) {
 		// WebSocket에 연결된 사용자가 있는지 확인
 

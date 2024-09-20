@@ -130,4 +130,12 @@ public class TodoController {
 
 		return ResponseEntity.ok().build();
 	}
+
+	@GetMapping("/statistics")
+	public ResponseEntity<TodoStatistics> getStatistics(@RequestAttribute("userId") Long userId) {
+
+		TodoStatistics todoStatistics = todoService.getStatistics(userId);
+
+		return ResponseEntity.ok(todoStatistics);
+	}
 }

@@ -57,4 +57,6 @@ public interface TodoService {
 	String dateConvertToString(LocalDateTime localDateTime);
 
 	void updateTodoByPush(TodoPushUpdateRequest request, Long todoId, Long userId);
+
+	TodoStatistics getStatistics(Long userId);
 }

@@ -21,6 +21,7 @@ import org.onesentence.onesentence.domain.fcm.service.FCMService;
 import org.onesentence.onesentence.domain.gpt.dto.GPTAnalyzeResponse;
 import org.onesentence.onesentence.domain.gpt.service.GptService;
 import org.onesentence.onesentence.domain.todo.dto.AvailableTimeSlots;
+import org.onesentence.onesentence.domain.todo.entity.Todo;
 import org.onesentence.onesentence.domain.todo.service.TodoService;
 import org.onesentence.onesentence.global.exception.ExceptionStatus;
 import org.onesentence.onesentence.global.exception.NotFoundException;
@@ -67,6 +68,9 @@ public class ChatServiceImpl implements ChatService {
 
 			} else {
 				// "예" 또는 다른 메시지인 경우 일정이 확정되었음을 알림
+				Todo todo = todoService.findById(message.getTodoId());
+				String start = todoService.dateConvertToString(todo.getStart());
+
 				ChatTypeMessage chatTypeMessage = ChatTypeMessage.builder()
 					.label("message")
 					.message("일정이 확정되었습니다!")
@@ -76,7 +80,7 @@ public class ChatServiceImpl implements ChatService {
 
 				// 채팅방에 일정 확정 메시지를 전송
 				simpMessagingTemplate.convertAndSend("/sub/chatroom/hanfinal", chatTypeMessage);
-				fcmService.sendNoChangeTo(message);
+				fcmService.sendNoChangeTo(todo, start);
 			}
 
 			// "date" 타입의 메시지인 경우
@@ -94,6 +98,8 @@ public class ChatServiceImpl implements ChatService {
 			// 선택한 날짜로 일정 수정
 			todoService.updateTodoDate(message.getTodoId(), dateTime);
 
+			Todo todo = todoService.findById(message.getTodoId());
+			String start = todoService.dateConvertToString(todo.getStart());
 			// 일정 확정 메시지를 생성하고 전송
 			ChatTypeMessage chatTypeMessage = ChatTypeMessage.builder()
 				.label("message")
@@ -101,7 +107,7 @@ public class ChatServiceImpl implements ChatService {
 				.build();
 
 			simpMessagingTemplate.convertAndSend("/sub/chatroom/hanfinal", chatTypeMessage);
-			fcmService.sendCoordinationTo(message);
+			fcmService.sendCoordinationTo(todo, start);
 			// "gpt" 타입의 메시지인 경우
 		} else if (message.getType().equals("gpt")) {
 			// GPT로 분석 요청 후 필요한 작업을 수행

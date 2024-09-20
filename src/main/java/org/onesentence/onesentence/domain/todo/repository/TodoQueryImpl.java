@@ -11,6 +11,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.onesentence.onesentence.domain.todo.dto.TodoDate;
 import org.onesentence.onesentence.domain.todo.dto.TodoPriority;
+import org.onesentence.onesentence.domain.todo.dto.TodoStatistics;
 import org.onesentence.onesentence.domain.todo.entity.QTodo;
 import org.onesentence.onesentence.domain.todo.entity.Todo;
 import org.onesentence.onesentence.domain.todo.entity.TodoStatus;
@@ -161,6 +162,31 @@ public class TodoQueryImpl implements TodoQuery {
 					.and(todo.end.gt(startTime))   // 종료 시간이 startTime보다 커야 겹침
 			)
 			.fetch();
+	}
+
+	@Override
+	public int getStatistics(Long userId) {
+		QTodo todo = QTodo.todo;
+
+		Long totalTodosCount = jpaQueryFactory.select(todo.count())
+			.from(todo)
+			.where(todo.userId.eq(userId))
+			.fetchOne();
+
+		Long doneTodosCount = jpaQueryFactory.select(todo.count())
+			.from(todo)
+			.where(todo.userId.eq(userId)
+				.and(todo.status.eq(TodoStatus.DONE)))
+			.fetchOne();
+
+		totalTodosCount = totalTodosCount != null ? totalTodosCount : 0;
+		doneTodosCount = doneTodosCount != null ? doneTodosCount : 0;
+
+		if (totalTodosCount == 0) {
+			return 0; // 전체 투두 수가 0일 때는 0% 반환
+		}
+
+		return (int) ((doneTodosCount / (double) totalTodosCount) * 100);
 	}
 
 }

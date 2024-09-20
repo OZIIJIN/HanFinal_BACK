@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 public class FCMServiceImpl implements FCMService {
 
 	private final FirebaseMessaging firebaseMessaging;
-	private final TodoService todoService;
 	private final UserService userService;
 
 	@Override
@@ -64,16 +63,14 @@ public class FCMServiceImpl implements FCMService {
 	}
 
 	@Override
-	public void sendCoordinationTo(ChatMessage chatMessage) throws FirebaseMessagingException {
-		Todo todo = todoService.findById(chatMessage.getTodoId());
+	public void sendCoordinationTo(Todo todo, String start) throws FirebaseMessagingException {
 		User user = userService.findByUserId(todo.getUserId());
 
 		Message message = Message.builder()
 			.setToken(user.getFcmToken())
 			.setNotification(Notification.builder()
 				.setTitle("한끝봇에 의해 일정이 조율되었습니다!")
-				.setBody("[" + todo.getTitle() + "] " + todoService.dateConvertToString(todo.getStart())
-					+ " 으로 일정이 변경되었습니다.")
+				.setBody("[" + todo.getTitle() + "] " + start + " 으로 일정이 변경되었습니다.")
 				.build())
 			.putData("todoId", todo.getId().toString())
 			.build();
@@ -82,16 +79,14 @@ public class FCMServiceImpl implements FCMService {
 	}
 
 	@Override
-	public void sendNoChangeTo(ChatMessage chatMessage) throws FirebaseMessagingException {
-		Todo todo = todoService.findById(chatMessage.getTodoId());
+	public void sendNoChangeTo(Todo todo, String start) throws FirebaseMessagingException {
 		User user = userService.findByUserId(todo.getUserId());
 
 		Message message = Message.builder()
 			.setToken(user.getFcmToken())
 			.setNotification(Notification.builder()
 				.setTitle("한끝봇에 의해 일정이 조율되었습니다!")
-				.setBody("[" + todo.getTitle() + "] " + todoService.dateConvertToString(todo.getStart())
-					+ " 으로 기존 일정대로 확정되었습니다.")
+				.setBody("[" + todo.getTitle() + "] " +start + " 으로 기존 일정대로 확정되었습니다.")
 				.build())
 			.putData("todoId", todo.getId().toString())
 			.build();

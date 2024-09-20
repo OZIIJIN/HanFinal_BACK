@@ -6,6 +6,7 @@ import org.checkerframework.checker.units.qual.C;
 import org.onesentence.onesentence.domain.chat.dto.ChatMessage;
 import org.onesentence.onesentence.domain.fcm.dto.FCMSendDto;
 import org.onesentence.onesentence.domain.fcm.dto.FCMWeatherDto;
+import org.onesentence.onesentence.domain.todo.entity.Todo;
 
 public interface FCMService {
 
@@ -15,7 +16,7 @@ public interface FCMService {
 
 	void test(String test);
 
-	void sendCoordinationTo(ChatMessage message) throws FirebaseMessagingException;
+	void sendCoordinationTo(Todo todo, String start) throws FirebaseMessagingException;
 
-	void sendNoChangeTo(ChatMessage message) throws FirebaseMessagingException;
+	void sendNoChangeTo(Todo todo, String start) throws FirebaseMessagingException;
 }

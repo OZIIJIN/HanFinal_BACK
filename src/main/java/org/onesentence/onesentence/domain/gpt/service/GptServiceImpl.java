@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +35,7 @@ public class GptServiceImpl implements GptService {
 		"너는 한 문장에서 여러 단어를 분류하는 역할이야. "
 			+ "prompt 문장을 일정으로 등록하려는데 JSON 형태로 일정 내용, 카테고리, 일정 시작 시간, 일정 끝 시간, 장소, 협업자, 소요 시간(시간)으로 분류해줘. 해당 값이 없으면 null 표시해줘."
 			+ "아래 양식 꼭 지켜줘. 현재 날짜는 "
-			+ LocalDateTime.now()
+			+ LocalDateTime.now(ZoneId.of("Asia/Seoul"))
 			+ "이야. title, category, location, together 는 String 타입, start, end 는 LocalDateTime 타입이고 inputTime 은 Integer 타입이야.";
 
 	private final String SYSTEM_MESSAGE_ANALYZE =

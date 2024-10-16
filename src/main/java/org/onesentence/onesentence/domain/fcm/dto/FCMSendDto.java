@@ -4,7 +4,7 @@ import lombok.*;
 
 @Getter
 @NoArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 public class FCMSendDto {
 	private String token;
 
@@ -20,5 +20,6 @@ public class FCMSendDto {
 		this.body = body;
 		this.todoId = todoId;
 	}
+
 
 }

@@ -41,7 +41,7 @@ dependencies {
 
 	implementation 'com.fasterxml.jackson.core:jackson-core:2.16.1'     // Jackson Data Bind
 
-	implementation 'org.springframework.boot:spring-boot-starter-quartz:2.7.5'      // Spring Boot Quartz
+	implementation 'org.springframework.boot:spring-boot-starter-quartz:3.3.0'// Spring Boot Quartz
 
 	implementation 'io.jsonwebtoken:jjwt:0.9.1'
 	// com.sun.xml.bind

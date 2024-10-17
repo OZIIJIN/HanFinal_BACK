@@ -34,8 +34,7 @@ public class FcmJob implements Job {
 			.build();
 
 		try {
-			String respone = fcmService.sendMessageTo(fcmSendDto);
-			log.info(respone);
+			fcmService.sendMessageTo(fcmSendDto);
 		} catch (IOException | FirebaseMessagingException e) {
 			throw new RuntimeException(e);
 		}

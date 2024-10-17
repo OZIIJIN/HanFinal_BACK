@@ -30,8 +30,8 @@ public class FCMController {
 		throws IOException, FirebaseMessagingException {
 
 		log.debug("[+] 푸시 메시지를 전송합니다. ");
-		String response = fcmService.sendMessageTo(fcmSendDto);
+		fcmService.sendMessageTo(fcmSendDto);
 
-		return ResponseEntity.ok().body(response);
+		return ResponseEntity.ok().build();
 	}
 }

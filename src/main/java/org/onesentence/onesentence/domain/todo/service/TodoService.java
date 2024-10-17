@@ -34,7 +34,7 @@ public interface TodoService {
 
 	List<TodoResponse> getPriorities(Long userId);
 
-	Long createTodoByOneSentence(GPTCallTodoRequest gptCallTodoRequest, Long userId)
+	Long createTodoByOneSentence(TextRequest request, Long userId)
 		throws IOException, FirebaseMessagingException;
 
 	Long setInputTime(Long todoId, TodoInputTimeRequest request, Long userId);

@@ -1,10 +1,12 @@
 package org.onesentence.onesentence.domain.fcm.service;
 
+import com.google.api.core.ApiFuture;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.onesentence.onesentence.domain.chat.dto.ChatMessage;
@@ -25,7 +27,7 @@ public class FCMServiceImpl implements FCMService {
 	private final UserService userService;
 
 	@Override
-	public String sendMessageTo(FCMSendDto fcmSendDto) throws IOException, FirebaseMessagingException {
+	public CompletableFuture<String> sendMessageTo(FCMSendDto fcmSendDto) throws IOException, FirebaseMessagingException {
 
 		Message message = Message.builder()
 			.setToken(fcmSendDto.getToken())
@@ -36,7 +38,15 @@ public class FCMServiceImpl implements FCMService {
 			.putData("todoId", fcmSendDto.getTodoId().toString())
 			.build();
 
-		return firebaseMessaging.send(message);
+		ApiFuture<String> response = firebaseMessaging.sendAsync(message);
+
+		return CompletableFuture.supplyAsync(() -> {
+			try {
+				return response.get(); // 비동기 전송 결과 가져오기
+			} catch (Exception e) {
+				throw new RuntimeException("FCM 전송 실패", e);
+			}
+		});
 
 	}
 

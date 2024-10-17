@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.onesentence.onesentence.domain.gpt.dto.GPTCallTodoRequest;
 import org.onesentence.onesentence.domain.todo.dto.TodoRequest;
 
 @Getter
@@ -100,5 +101,15 @@ public class Todo {
 	public void updateTodoDate(LocalDateTime start, LocalDateTime end) {
 		this.start = start;
 		this.end = end;
+	}
+
+	public void updateFromGpt(GPTCallTodoRequest request) {
+		this.title = request.getTitle();
+		this.start = request.getStart();
+		this.end = request.getEnd();
+		this.category = request.getCategory();
+		this.location = request.getLocation();
+		this.together = request.getTogether();
+		this.inputTime = request.getInputTime();
 	}
 }

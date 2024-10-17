@@ -1,5 +1,6 @@
 package org.onesentence.onesentence.domain.todo.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -7,6 +8,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledFuture;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ import org.onesentence.onesentence.domain.fcm.dto.FCMSendDto;
 import org.onesentence.onesentence.domain.fcm.service.FCMService;
 import org.onesentence.onesentence.domain.fcm.service.SchedulerService;
 import org.onesentence.onesentence.domain.gpt.dto.GPTCallTodoRequest;
+import org.onesentence.onesentence.domain.gpt.service.GptService;
 import org.onesentence.onesentence.domain.todo.dto.*;
 import org.onesentence.onesentence.domain.todo.entity.Todo;
 import org.onesentence.onesentence.domain.todo.entity.TodoStatus;
@@ -52,6 +55,7 @@ public class TodoServiceImpl implements TodoService {
 	private final SimpUserRegistry simpUserRegistry;
 	private final WebSocketEventListener webSocketEventListener;
 	private final FCMService fcmService;
+	private final GptService gptService;
 
 	private ScheduledFuture<?> futureMessageTask;
 
@@ -233,42 +237,22 @@ public class TodoServiceImpl implements TodoService {
 
 	@Override
 	@Transactional
-	public Long createTodoByOneSentence(GPTCallTodoRequest gptCallTodoRequest, Long userId)
+	public Long createTodoByOneSentence(TextRequest request, Long userId)
 		throws IOException, FirebaseMessagingException {
-		User user = findUserByUserId(userId);
+		checkUserExistence(userId);
 
-		if (gptCallTodoRequest.getInputTime()==null || gptCallTodoRequest.getInputTime()==0) {
-			gptCallTodoRequest.setInputTime(1);
-		}
-		if (gptCallTodoRequest.getStart()==null) {
-			gptCallTodoRequest.setStart(LocalDateTime.now());
-		}
-		if (gptCallTodoRequest.getEnd()==null) {
-			gptCallTodoRequest.setEnd(
-				gptCallTodoRequest.getStart().plusMinutes(60L * gptCallTodoRequest.getInputTime()));
-		}
+		Todo savedTodo = createInitialTodo(userId);
 
-		Todo todo = Todo.builder()
-			.title(gptCallTodoRequest.getTitle())
-			.start(gptCallTodoRequest.getStart())
-			.category(gptCallTodoRequest.getCategory())
-			.status(TodoStatus.TODO)
-			.end(gptCallTodoRequest.getEnd())
-			.location(gptCallTodoRequest.getLocation())
-			.together(gptCallTodoRequest.getTogether())
-			.userId(userId)
-			.inputTime(gptCallTodoRequest.getInputTime())
-			.build();
-		Todo savedTodo = todoJpaRepository.save(todo);
+		CompletableFuture<GPTCallTodoRequest> gptFuture = fetchGPTResultsAsync(request.getText());
 
-		FCMSendDto fcmSendDto = FCMSendDto.builder()
-			.token(user.getFcmToken())
-			.title("일정 등록 완료!")
-			.body("[" + todo.getTitle() + "] 일정이 등록되었습니다.")
-			.todoId(savedTodo.getId())
-			.build();
+		CompletableFuture<User> userFuture = fetchUserAsync(userId);
 
-		fcmService.sendMessageTo(fcmSendDto);
+		gptFuture.thenCombine(userFuture, (gptCallTodoRequest, user) -> {
+			updateTodoFromGPT(savedTodo, gptCallTodoRequest);
+			return user;
+		}).thenAcceptAsync(user -> {
+			sendFcmAsync(savedTodo, user);
+		});
 
 		return savedTodo.getId();
 	}
@@ -556,6 +540,71 @@ public class TodoServiceImpl implements TodoService {
 
 		log.info("추천 가능한 빈 시간이 없습니다.");
 		return null; // 만약 빈 시간이 없을 경우 null 반환 (예외 처리 가능)
+	}
+
+	private void validateAndSetDefaults(GPTCallTodoRequest gptCallTodoRequest) {
+		if (gptCallTodoRequest.getInputTime() == null || gptCallTodoRequest.getInputTime() == 0) {
+			gptCallTodoRequest.setInputTime(1);
+		}
+		if (gptCallTodoRequest.getStart() == null) {
+			gptCallTodoRequest.setStart(LocalDateTime.now());
+		}
+		if (gptCallTodoRequest.getEnd() == null) {
+			gptCallTodoRequest.setEnd(
+				gptCallTodoRequest.getStart().plusMinutes(60L * gptCallTodoRequest.getInputTime()));
+		}
+	}
+
+	private void checkUserExistence(Long userId) {
+		if (!userJpaRepository.existsById(userId)) {
+			throw new NotFoundException(ExceptionStatus.NOT_FOUND);
+		}
+	}
+
+	private Todo createInitialTodo(Long userId) {
+		Todo todo = Todo.builder()
+			.status(TodoStatus.TODO)
+			.userId(userId)
+			.build();
+		return todoJpaRepository.save(todo);
+	}
+
+	private CompletableFuture<GPTCallTodoRequest> fetchGPTResultsAsync(String text) {
+		return CompletableFuture.supplyAsync(() -> {
+			try {
+				GPTCallTodoRequest gptCallTodoRequest = gptService.gptCall(text);
+
+				validateAndSetDefaults(gptCallTodoRequest);
+				return gptCallTodoRequest;
+			} catch (JsonProcessingException e) {
+				throw new RuntimeException(e);
+			}
+		});
+	}
+
+	private CompletableFuture<User> fetchUserAsync(Long userId) {
+		return CompletableFuture.supplyAsync(() -> findUserByUserId(userId));
+	}
+
+	private void sendFcmAsync(Todo todo, User user) {
+		CompletableFuture.runAsync(() -> {
+			try {
+				FCMSendDto fcmSendDto = FCMSendDto.builder()
+					.token(user.getFcmToken())
+					.title("일정 등록 완료!")
+					.body("[" + todo.getTitle() + "] 일정이 등록되었습니다.")
+					.todoId(todo.getId())
+					.build();
+				fcmService.sendMessageTo(fcmSendDto);
+			} catch (IOException | FirebaseMessagingException e) {
+				throw new RuntimeException(e);
+			}
+		});
+	}
+
+	private void updateTodoFromGPT(Todo todo, GPTCallTodoRequest gptCallTodoRequest) {
+		todo.updateFromGpt(gptCallTodoRequest);
+		todoJpaRepository.save(todo);
 	}
 
 }

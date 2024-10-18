@@ -23,6 +23,7 @@ import org.onesentence.onesentence.domain.fcm.service.FCMService;
 import org.onesentence.onesentence.domain.fcm.service.SchedulerService;
 import org.onesentence.onesentence.domain.gpt.dto.GPTCallTodoRequest;
 import org.onesentence.onesentence.domain.gpt.service.GptService;
+import org.onesentence.onesentence.domain.gpt.service.GptServiceImpl;
 import org.onesentence.onesentence.domain.todo.dto.*;
 import org.onesentence.onesentence.domain.todo.entity.Todo;
 import org.onesentence.onesentence.domain.todo.entity.TodoStatus;
@@ -34,6 +35,8 @@ import org.onesentence.onesentence.global.WebSocketEventListener;
 import org.onesentence.onesentence.global.exception.ExceptionStatus;
 import org.onesentence.onesentence.global.exception.NotFoundException;
 import org.quartz.SchedulerException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -58,6 +61,9 @@ public class TodoServiceImpl implements TodoService {
 	private final GptService gptService;
 
 	private ScheduledFuture<?> futureMessageTask;
+
+	private static final Logger logger = LoggerFactory.getLogger(TodoServiceImpl.class);
+
 
 	private User findUserByUserId(Long userId) {
 		return userJpaRepository.findById(userId)
@@ -239,6 +245,10 @@ public class TodoServiceImpl implements TodoService {
 	@Transactional
 	public Long createTodoByOneSentence(TextRequest request, Long userId)
 		throws IOException, FirebaseMessagingException {
+
+		long startTime = System.currentTimeMillis();
+		logger.info("Create Todo 비동기 호출 시작: {}", startTime);
+
 		checkUserExistence(userId);
 
 		Todo savedTodo = createInitialTodo(userId);
@@ -251,8 +261,18 @@ public class TodoServiceImpl implements TodoService {
 			updateTodoFromGPT(savedTodo, gptCallTodoRequest);
 			return user;
 		}).thenAcceptAsync(user -> {
+			long fcmStartTime = System.currentTimeMillis(); // FCM 전송 시작 시간
+			logger.info("FCM 전송 비동기 호출 시작: {}", fcmStartTime);
+
 			sendFcmAsync(savedTodo, user);
+
+			long fcmEndTime = System.currentTimeMillis(); // FCM 전송 종료 시간
+			logger.info("FCM 전송 완료. 소요 시간: {} ms", (fcmEndTime - fcmStartTime));
 		});
+
+		long endTime = System.currentTimeMillis(); // 비동기 호출 종료 시간
+		logger.info("Create Todo 비동기 호출 완료. 총 소요 시간: {} ms", (endTime - startTime));
+
 
 		return savedTodo.getId();
 	}

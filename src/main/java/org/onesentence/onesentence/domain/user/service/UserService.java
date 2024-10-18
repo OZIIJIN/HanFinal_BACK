@@ -12,4 +12,6 @@ public interface UserService {
 
 	User findByUserId(Long userId);
 
+	void checkUserExistence(Long userId);
+
 }

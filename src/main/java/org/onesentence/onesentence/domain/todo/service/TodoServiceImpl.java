@@ -9,6 +9,8 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -64,6 +66,7 @@ public class TodoServiceImpl implements TodoService {
 
 	private static final Logger logger = LoggerFactory.getLogger(TodoServiceImpl.class);
 
+	private static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(16);
 
 	private User findUserByUserId(Long userId) {
 		return userJpaRepository.findById(userId)
@@ -242,39 +245,37 @@ public class TodoServiceImpl implements TodoService {
 
 
 	@Override
-	@Transactional
-	public Long createTodoByOneSentence(TextRequest request, Long userId)
-		throws IOException, FirebaseMessagingException {
-
-		long startTime = System.currentTimeMillis();
-		logger.info("Create Todo 비동기 호출 시작: {}", startTime);
+	public Long createTodoByOneSentence(TextRequest request, Long userId) throws IOException {
 
 		checkUserExistence(userId);
 
-		Todo savedTodo = createInitialTodo(userId);
+		fetchGPTResultsAsync(request.getText())
+			.thenAcceptAsync(gptCallTodoRequest -> {
 
-		CompletableFuture<GPTCallTodoRequest> gptFuture = fetchGPTResultsAsync(request.getText());
+				Todo savedTodo = saveTodo(gptCallTodoRequest, userId);
 
-		CompletableFuture<User> userFuture = fetchUserAsync(userId);
+				sendFcmMessageAsync(savedTodo, userId);
+			}, EXECUTOR);
 
-		gptFuture.thenCombine(userFuture, (gptCallTodoRequest, user) -> {
-			updateTodoFromGPT(savedTodo, gptCallTodoRequest);
-			return user;
-		}).thenAcceptAsync(user -> {
-			long fcmStartTime = System.currentTimeMillis(); // FCM 전송 시작 시간
-			logger.info("FCM 전송 비동기 호출 시작: {}", fcmStartTime);
+		// 비동기 로직이기 때문에, 임시 ID나 응답을 바로 반환
+		return System.currentTimeMillis();
+	}
 
-			sendFcmAsync(savedTodo, user);
+	@Transactional
+	public Todo saveTodo(GPTCallTodoRequest gptCallTodoRequest, Long userId) {
+		Todo todo = Todo.builder()
+			.title(gptCallTodoRequest.getTitle())
+			.start(gptCallTodoRequest.getStart())
+			.category(gptCallTodoRequest.getCategory())
+			.status(TodoStatus.TODO)
+			.end(gptCallTodoRequest.getEnd())
+			.location(gptCallTodoRequest.getLocation())
+			.together(gptCallTodoRequest.getTogether())
+			.userId(userId)
+			.inputTime(gptCallTodoRequest.getInputTime())
+			.build();
 
-			long fcmEndTime = System.currentTimeMillis(); // FCM 전송 종료 시간
-			logger.info("FCM 전송 완료. 소요 시간: {} ms", (fcmEndTime - fcmStartTime));
-		});
-
-		long endTime = System.currentTimeMillis(); // 비동기 호출 종료 시간
-		logger.info("Create Todo 비동기 호출 완료. 총 소요 시간: {} ms", (endTime - startTime));
-
-
-		return savedTodo.getId();
+		return todoJpaRepository.save(todo);
 	}
 
 	@Override
@@ -580,15 +581,6 @@ public class TodoServiceImpl implements TodoService {
 			throw new NotFoundException(ExceptionStatus.NOT_FOUND);
 		}
 	}
-
-	private Todo createInitialTodo(Long userId) {
-		Todo todo = Todo.builder()
-			.status(TodoStatus.TODO)
-			.userId(userId)
-			.build();
-		return todoJpaRepository.save(todo);
-	}
-
 	private CompletableFuture<GPTCallTodoRequest> fetchGPTResultsAsync(String text) {
 		return CompletableFuture.supplyAsync(() -> {
 			try {
@@ -599,32 +591,24 @@ public class TodoServiceImpl implements TodoService {
 			} catch (JsonProcessingException e) {
 				throw new RuntimeException(e);
 			}
-		});
+		}, EXECUTOR);
 	}
 
-	private CompletableFuture<User> fetchUserAsync(Long userId) {
-		return CompletableFuture.supplyAsync(() -> findUserByUserId(userId));
-	}
-
-	private void sendFcmAsync(Todo todo, User user) {
+	private void sendFcmMessageAsync(Todo savedTodo, Long userId) {
 		CompletableFuture.runAsync(() -> {
 			try {
+				User user = findUserByUserId(userId);
 				FCMSendDto fcmSendDto = FCMSendDto.builder()
 					.token(user.getFcmToken())
 					.title("일정 등록 완료!")
-					.body("[" + todo.getTitle() + "] 일정이 등록되었습니다.")
-					.todoId(todo.getId())
+					.body("[" + savedTodo.getTitle() + "] 일정이 등록되었습니다.")
+					.todoId(savedTodo.getId())
 					.build();
 				fcmService.sendMessageTo(fcmSendDto);
 			} catch (IOException | FirebaseMessagingException e) {
+				// 예외 처리 로직 추가 (로그 저장 등)
 				throw new RuntimeException(e);
 			}
-		});
+		}, EXECUTOR);
 	}
-
-	private void updateTodoFromGPT(Todo todo, GPTCallTodoRequest gptCallTodoRequest) {
-		todo.updateFromGpt(gptCallTodoRequest);
-		todoJpaRepository.save(todo);
-	}
-
 }

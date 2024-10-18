@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import org.onesentence.onesentence.domain.todo.dto.AvailableTimeSlots;
 import org.onesentence.onesentence.domain.gpt.dto.GPTCallTodoRequest;
 import org.onesentence.onesentence.domain.todo.dto.*;

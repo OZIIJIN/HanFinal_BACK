@@ -10,6 +10,4 @@ public interface GptService {
 
 	GPTAnalyzeResponse gptCallForTodoCoordination(String prompt, Long todoId) throws JsonProcessingException;
 
-	String test(String prompt) ;
-
 }

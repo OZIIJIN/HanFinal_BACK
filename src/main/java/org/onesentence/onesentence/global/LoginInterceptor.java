@@ -26,6 +26,12 @@ public class LoginInterceptor implements HandlerInterceptor {
 		Object handler)
 		throws IOException {
 
+		String requestURI = request.getRequestURI();
+
+		if (requestURI.contains("/actuator")) {
+			return true;
+		}
+
 		String nickName = request.getHeader("NICKNAME");
 		log.info("User NickName: " + nickName);
 

@@ -11,7 +11,7 @@ import org.onesentence.onesentence.domain.todo.entity.Todo;
 
 public interface FCMService {
 
-	CompletableFuture<String> sendMessageTo(FCMSendDto fcmSendDto) throws IOException, FirebaseMessagingException;
+	void sendMessageTo(FCMSendDto fcmSendDto) throws IOException, FirebaseMessagingException;
 
 	void sendWeatherPushTo(FCMWeatherDto fcmWeatherDto) throws FirebaseMessagingException;
 

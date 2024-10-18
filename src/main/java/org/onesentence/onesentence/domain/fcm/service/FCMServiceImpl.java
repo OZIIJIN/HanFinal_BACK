@@ -14,8 +14,12 @@ import org.onesentence.onesentence.domain.fcm.dto.FCMSendDto;
 import org.onesentence.onesentence.domain.fcm.dto.FCMWeatherDto;
 import org.onesentence.onesentence.domain.todo.entity.Todo;
 import org.onesentence.onesentence.domain.todo.service.TodoService;
+import org.onesentence.onesentence.domain.todo.service.TodoServiceImpl;
 import org.onesentence.onesentence.domain.user.entity.User;
 import org.onesentence.onesentence.domain.user.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -25,9 +29,14 @@ public class FCMServiceImpl implements FCMService {
 
 	private final FirebaseMessaging firebaseMessaging;
 	private final UserService userService;
+	private static final Logger logger = LoggerFactory.getLogger(FCMServiceImpl.class);
 
 	@Override
-	public CompletableFuture<String> sendMessageTo(FCMSendDto fcmSendDto) throws IOException, FirebaseMessagingException {
+	@Async
+	public void sendMessageTo(FCMSendDto fcmSendDto) throws IOException, FirebaseMessagingException {
+
+		long sendStartTime = System.currentTimeMillis();
+		logger.info("FCM 메시지 전송 시작: {}", sendStartTime);
 
 		Message message = Message.builder()
 			.setToken(fcmSendDto.getToken())
@@ -37,20 +46,11 @@ public class FCMServiceImpl implements FCMService {
 				.build())
 			.putData("todoId", fcmSendDto.getTodoId().toString())
 			.build();
-
-		ApiFuture<String> response = firebaseMessaging.sendAsync(message);
-
-		return CompletableFuture.supplyAsync(() -> {
-			try {
-				return response.get(); // 비동기 전송 결과 가져오기
-			} catch (Exception e) {
-				throw new RuntimeException("FCM 전송 실패", e);
-			}
-		});
-
+		firebaseMessaging.send(message);
 	}
 
 	@Override
+	@Async
 	public void sendWeatherPushTo(FCMWeatherDto fcmWeatherDto) throws FirebaseMessagingException {
 		Message message = Message.builder()
 			.setToken(fcmWeatherDto.getToken())

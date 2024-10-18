@@ -6,6 +6,7 @@ import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.onesentence.onesentence.domain.text.dto.TextRequest;
 import org.onesentence.onesentence.domain.todo.dto.*;
 import org.onesentence.onesentence.domain.todo.entity.TodoStatus;
 import org.onesentence.onesentence.domain.todo.service.TodoService;
@@ -24,16 +25,6 @@ public class TodoController {
 	public ResponseEntity<String> createTodo(@RequestBody TodoRequest request,
 		@RequestAttribute("userId") Long userId) throws SchedulerException {
 		Long todoId = todoService.createTodo(request, userId);
-
-		return ResponseEntity.created(URI.create("/api/v1/todos/" + todoId)).build();
-	}
-
-	@PostMapping("/texts")
-	public ResponseEntity<String> createText(@RequestBody TextRequest request,
-		@RequestAttribute("userId") Long userId)
-		throws IOException, FirebaseMessagingException {
-
-		Long todoId = todoService.createTodoByOneSentence(request, userId);
 
 		return ResponseEntity.created(URI.create("/api/v1/todos/" + todoId)).build();
 	}

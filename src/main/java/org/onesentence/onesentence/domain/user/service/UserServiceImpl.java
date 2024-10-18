@@ -9,6 +9,7 @@ import org.onesentence.onesentence.domain.user.dto.UserSignUpRequestDto;
 import org.onesentence.onesentence.domain.user.entity.User;
 import org.onesentence.onesentence.domain.user.repository.UserJpaRepository;
 import org.onesentence.onesentence.global.exception.DuplicatedException;
+import org.onesentence.onesentence.global.exception.ExceptionStatus;
 import org.onesentence.onesentence.global.exception.NotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +40,13 @@ public class UserServiceImpl implements UserService {
 	@Transactional(readOnly = true)
 	public User findByUserId(Long userId) {
 		return userJpaRepository.findById(userId).orElseThrow(() -> new NotFoundException(NOT_FOUND));
+	}
+
+	@Override
+	public void checkUserExistence(Long userId) {
+		if (!userJpaRepository.existsById(userId)) {
+			throw new NotFoundException(ExceptionStatus.NOT_FOUND);
+		}
 	}
 
 	private void checkIfNickNameAlreadyExists(String nickName) {

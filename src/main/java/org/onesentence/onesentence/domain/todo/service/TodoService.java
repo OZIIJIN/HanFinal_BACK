@@ -5,9 +5,9 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import org.onesentence.onesentence.domain.todo.dto.AvailableTimeSlots;
 import org.onesentence.onesentence.domain.gpt.dto.GPTCallTodoRequest;
+import org.onesentence.onesentence.domain.text.dto.TextRequest;
+import org.onesentence.onesentence.domain.todo.dto.AvailableTimeSlots;
 import org.onesentence.onesentence.domain.todo.dto.*;
 import org.onesentence.onesentence.domain.todo.entity.Todo;
 import org.onesentence.onesentence.domain.todo.entity.TodoStatus;
@@ -35,9 +35,6 @@ public interface TodoService {
 
 	List<TodoResponse> getPriorities(Long userId);
 
-	Long createTodoByOneSentence(TextRequest request, Long userId)
-		throws IOException, FirebaseMessagingException;
-
 	Long setInputTime(Long todoId, TodoInputTimeRequest request, Long userId);
 
 	void coordinateTodo(Long todoId, Long userId) throws SchedulerException;
@@ -60,4 +57,6 @@ public interface TodoService {
 	void updateTodoByPush(TodoPushUpdateRequest request, Long todoId, Long userId);
 
 	TodoStatistics getStatistics(Long userId);
+
+	Todo saveTodo(GPTCallTodoRequest gptCallTodoRequest, Long userId);
 }

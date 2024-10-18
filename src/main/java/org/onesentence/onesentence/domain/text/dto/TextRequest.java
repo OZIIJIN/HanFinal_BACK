@@ -1,4 +1,4 @@
-package org.onesentence.onesentence.domain.todo.dto;
+package org.onesentence.onesentence.domain.text.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

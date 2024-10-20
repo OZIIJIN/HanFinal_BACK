@@ -30,9 +30,12 @@ public class TextServiceImpl implements TextService{
 	private final UserService userService;
 	private final FCMService fcmService;
 	private final GptService gptService;
-	private static final Logger logger = LoggerFactory.getLogger(TodoServiceImpl.class);
 
-	private static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(16);
+	private static final ExecutorService GPT_EXECUTOR = Executors.newFixedThreadPool(5);
+	private static final ExecutorService FCM_EXECUTOR = Executors.newFixedThreadPool(5);
+	private static final ExecutorService SAVE_EXECUTOR = Executors.newFixedThreadPool(8);
+
+
 
 	@Override
 	public Long createTodoByOneSentence(TextRequest request, Long userId) throws IOException {
@@ -45,7 +48,7 @@ public class TextServiceImpl implements TextService{
 				Todo savedTodo = todoService.saveTodo(gptCallTodoRequest, userId);
 
 				sendFcmMessageAsync(savedTodo, userId);
-			}, EXECUTOR);
+			}, GPT_EXECUTOR);
 
 		// 비동기 로직이기 때문에, 임시 ID나 응답을 바로 반환
 		return System.currentTimeMillis();
@@ -73,7 +76,7 @@ public class TextServiceImpl implements TextService{
 			} catch (JsonProcessingException e) {
 				throw new RuntimeException(e);
 			}
-		}, EXECUTOR);
+		}, SAVE_EXECUTOR);
 	}
 
 	private void sendFcmMessageAsync(Todo savedTodo, Long userId) {
@@ -91,6 +94,6 @@ public class TextServiceImpl implements TextService{
 				// 예외 처리 로직 추가 (로그 저장 등)
 				throw new RuntimeException(e);
 			}
-		}, EXECUTOR);
+		}, FCM_EXECUTOR);
 	}
 }

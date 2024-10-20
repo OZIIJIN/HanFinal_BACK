@@ -14,6 +14,6 @@ public interface TodoJpaRepository extends JpaRepository<Todo, Long> {
 
 	List<Todo> findByUserIdAndStartBetween(Long userId, LocalDateTime start, LocalDateTime end);
 
-	Page<Todo> findByStartBetween(LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+	List<Todo> findByStartBetween(LocalDateTime startDate, LocalDateTime endDate);
 
 }

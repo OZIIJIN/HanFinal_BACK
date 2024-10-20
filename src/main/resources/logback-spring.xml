@@ -1,31 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-  <!--로그 파일 저장 위치-->
+  <!-- 로그 파일 저장 위치 -->
   <property name="LOGS_PATH" value="./monitoring-stack/logs"/>
 
-
-  <!--local 프로필 환경-->
+  <!-- local 프로필 환경 -->
   <springProfile name="local">
     <!-- File 에 로그 출력 세팅 -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-      <!-- 출력패턴 설정-->
       <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
         <charset>UTF-8</charset>
-        <pattern>[ls] [%23d{yyyy_MM_dd_'T'_HH_mm_ss_SSS_z}] [%-5level] [%msg] [le]%n
-        </pattern>
+        <pattern>[ls] [%23d{yyyy_MM_dd_'T'_HH_mm_ss_SSS_z}] [%-5level] [%msg] [le]%n</pattern>
       </encoder>
-
-      <!-- Rolling 정책 : 로그 보관 정책 -->
       <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-        <!-- 로그 백업 파일 경로 설정 -->
-        <!-- .gz,.zip 등을 넣으면 자동 일자별 로그파일 압축 -->
-        <fileNamePattern>${LOGS_PATH}/local_%d{yyyy_MM_dd}(%i).log</fileNamePattern>
-        <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-          <!-- 파일당 최고 용량 KB, MB, GB -->
-          <!-- 아래 용량을 넘으면 파일 분할-->
-          <maxFileSize>10MB</maxFileSize>
-        </timeBasedFileNamingAndTriggeringPolicy>
-        <!-- 일자별 로그파일 최대 보관주기(~일), 해당 설정일 이상된 파일은 자동으로 제거-->
+        <fileNamePattern>${LOGS_PATH}/local_%d{yyyy_MM_dd}.log</fileNamePattern>
+        <maxFileSize>10MB</maxFileSize>
+        <maxHistory>30</maxHistory>
+      </rollingPolicy>
+    </appender>
+
+    <!-- 새로운 GPT 로그 Appender -->
+    <appender name="GPT_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+      <file>${LOGS_PATH}/gpt.log</file>
+      <encoder>
+        <charset>UTF-8</charset>
+        <pattern>[gpt] [%23d{yyyy_MM_dd_'T'_HH_mm_ss_SSS_z}] [%msg] [le]%n</pattern>
+      </encoder>
+      <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+        <fileNamePattern>${LOGS_PATH}/gpt_%d{yyyy_MM_dd}.log</fileNamePattern>
+        <maxFileSize>10MB</maxFileSize>
         <maxHistory>30</maxHistory>
       </rollingPolicy>
     </appender>
@@ -33,139 +35,60 @@
     <!-- CONSOLE 에 로그 출력 세팅 -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
       <layout class="ch.qos.logback.classic.PatternLayout">
-        <pattern>[ls] [%23d{yyyy_MM_dd_'T'_HH_mm_ss_SSS_z}] [%highlight(%-5level)] [%msg] [le]%n
-        </pattern>
+        <pattern>[ls] [%23d{yyyy_MM_dd_'T'_HH_mm_ss_SSS_z}] [%highlight(%-5level)] [%msg] [le]%n</pattern>
       </layout>
     </appender>
 
-    <!--        <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">-->
-    <!--            &lt;!&ndash; 로그 스태시 주소 &ndash;&gt;-->
-    <!--            <destination>localhost:5000</destination>-->
-    <!--            <encoder class="net.logstash.logback.encoder.LogstashEncoder">-->
-    <!--            </encoder>-->
-    <!--        </appender>-->
-
-    <!-- appender 별 세팅 -->
-    <!-- 로그 전역 세팅 -->
-    <!-- 로그 레벨 -->
-    <!--
-        1) ERROR : 오류 메시지 표시
-        2) WARN  : 경고성 메시지 표시
-        3) INFO  : 정보성 메시지 표시
-        4) DEBUG : 디버깅하기 위한 메시지 표시
-        5) TRACE :  Debug보다 훨씬 상세한 메시지 표시
-
-        예를들어 info 로 설정시, INFO 보다 위에 있는 DEBUG 와 TRACE 는 표시하지 않는다.
-    -->
     <root level="INFO">
       <appender-ref ref="FILE"/>
       <appender-ref ref="CONSOLE"/>
-      <!--            <appender-ref ref="LOGSTASH"/>-->
     </root>
+
+    <!-- GPT 로그 설정 -->
+    <logger name="gpt" level="INFO" additivity="false">
+      <appender-ref ref="GPT_FILE"/>
+    </logger>
   </springProfile>
 
-
-  <!--dev 프로필 환경-->
+  <!-- dev 프로필 환경 -->
   <springProfile name="dev">
-    <!-- File 에 로그 출력 세팅 -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-      <!-- 출력패턴 설정-->
       <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
         <charset>UTF-8</charset>
-        <pattern>[ls] [%23d{yyyy_MM_dd_'T'_HH_mm_ss_SSS_z}] [%-5level] [%msg] [le]%n
-        </pattern>
+        <pattern>[ls] [%23d{yyyy_MM_dd_'T'_HH_mm_ss_SSS_z}] [%-5level] [%msg] [le]%n</pattern>
       </encoder>
-
-      <!-- Rolling 정책 : 로그 보관 정책 -->
       <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-        <!-- 로그 백업 파일 경로 설정 -->
-        <!-- .gz,.zip 등을 넣으면 자동 일자별 로그파일 압축 -->
-        <fileNamePattern>${LOGS_PATH}/dev_%d{yyyy_MM_dd}(%i).log</fileNamePattern>
-        <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-          <!-- 파일당 최고 용량 KB, MB, GB -->
-          <!-- 아래 용량을 넘으면 파일 분할-->
-          <maxFileSize>10MB</maxFileSize>
-        </timeBasedFileNamingAndTriggeringPolicy>
-        <!-- 일자별 로그파일 최대 보관주기(~일), 해당 설정일 이상된 파일은 자동으로 제거-->
+        <fileNamePattern>${LOGS_PATH}/dev_%d{yyyy_MM_dd}.log</fileNamePattern>
+        <maxFileSize>10MB</maxFileSize>
         <maxHistory>30</maxHistory>
       </rollingPolicy>
     </appender>
-
-    <!--        <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">-->
-    <!--            &lt;!&ndash; 로그 스태시 주소 &ndash;&gt;-->
-    <!--            <destination>localhost:5000</destination>-->
-    <!--            <encoder class="net.logstash.logback.encoder.LogstashEncoder">-->
-    <!--            </encoder>-->
-    <!--        </appender>-->
-
-    <!-- appender 별 세팅 -->
-    <!-- 로그 전역 세팅 -->
-    <!-- 로그 레벨 -->
-    <!--
-        1) ERROR : 오류 메시지 표시
-        2) WARN  : 경고성 메시지 표시
-        3) INFO  : 정보성 메시지 표시
-        4) DEBUG : 디버깅하기 위한 메시지 표시
-        5) TRACE :  Debug보다 훨씬 상세한 메시지 표시
-
-        예를들어 info 로 설정시, INFO 보다 위에 있는 DEBUG 와 TRACE 는 표시하지 않는다.
-    -->
     <root level="INFO">
       <appender-ref ref="FILE"/>
-      <!--            <appender-ref ref="LOGSTASH"/>-->
     </root>
+    <logger name="gpt" level="INFO" additivity="false">
+      <appender-ref ref="GPT_FILE"/>
+    </logger>
   </springProfile>
 
-
-  <!--prod 프로필 환경-->
+  <!-- prod 프로필 환경 -->
   <springProfile name="prod">
-    <!-- File 에 로그 출력 세팅 -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-      <!-- 출력패턴 설정-->
       <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
         <charset>UTF-8</charset>
-        <pattern>[ls] [%23d{yyyy_MM_dd_'T'_HH_mm_ss_SSS_z}] [%-5level] [%msg] [le]%n
-        </pattern>
+        <pattern>[ls] [%23d{yyyy_MM_dd_'T'_HH_mm_ss_SSS_z}] [%-5level] [%msg] [le]%n</pattern>
       </encoder>
-
-      <!-- Rolling 정책 : 로그 보관 정책 -->
       <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-        <!-- 로그 백업 파일 경로 설정 -->
-        <!-- .gz,.zip 등을 넣으면 자동 일자별 로그파일 압축 -->
-        <fileNamePattern>${LOGS_PATH}/prod_%d{yyyy_MM_dd}(%i).log</fileNamePattern>
-        <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-          <!-- 파일당 최고 용량 KB, MB, GB -->
-          <!-- 아래 용량을 넘으면 파일 분할-->
-          <maxFileSize>10MB</maxFileSize>
-        </timeBasedFileNamingAndTriggeringPolicy>
-        <!-- 일자별 로그파일 최대 보관주기(~일), 해당 설정일 이상된 파일은 자동으로 제거-->
+        <fileNamePattern>${LOGS_PATH}/prod_%d{yyyy_MM_dd}.log</fileNamePattern>
+        <maxFileSize>10MB</maxFileSize>
         <maxHistory>30</maxHistory>
       </rollingPolicy>
     </appender>
-
-    <!--        <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">-->
-    <!--            &lt;!&ndash; 로그 스태시 주소 &ndash;&gt;-->
-    <!--            <destination>localhost:5000</destination>-->
-    <!--            <encoder class="net.logstash.logback.encoder.LogstashEncoder">-->
-    <!--            </encoder>-->
-    <!--        </appender>-->
-
-    <!-- appender 별 세팅 -->
-    <!-- 로그 전역 세팅 -->
-    <!-- 로그 레벨 -->
-    <!--
-        1) ERROR : 오류 메시지 표시
-        2) WARN  : 경고성 메시지 표시
-        3) INFO  : 정보성 메시지 표시
-        4) DEBUG : 디버깅하기 위한 메시지 표시
-        5) TRACE :  Debug보다 훨씬 상세한 메시지 표시
-
-        예를들어 info 로 설정시, INFO 보다 위에 있는 DEBUG 와 TRACE 는 표시하지 않는다.
-    -->
     <root level="INFO">
       <appender-ref ref="FILE"/>
-      <!--            <appender-ref ref="LOGSTASH"/>-->
     </root>
+    <logger name="gpt" level="INFO" additivity="false">
+      <appender-ref ref="GPT_FILE"/>
+    </logger>
   </springProfile>
-
 </configuration>

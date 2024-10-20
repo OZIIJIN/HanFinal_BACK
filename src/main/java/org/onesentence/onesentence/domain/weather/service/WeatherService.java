@@ -166,64 +166,6 @@ public class WeatherService {
 		return strSky.toString();
 	}
 
-	public void processWeatherNotifications() throws Exception {
-		int pageSize = 1000;
-		int pageNumber = 0;
-		LocalDateTime tomorrowStart = LocalDateTime.now().plusDays(1).toLocalDate().atStartOfDay();
-		LocalDateTime tomorrowEnd = tomorrowStart.plusDays(1).minusSeconds(1);
-
-		while (true) {
-			Pageable pageable = PageRequest.of(pageNumber++, pageSize);
-			Page<Todo> todoPage = todoJpaRepository.findByStartBetween(tomorrowStart, tomorrowEnd,
-				pageable);
-			if (!todoPage.hasContent()) {
-				break;
-			}
-
-			for (Todo todo : todoPage.getContent()) {
-				User user = userService.findByUserId(todo.getUserId());
-				FCMWeatherDto fcmSendDto = createNotificationMessage(todo, user);
-				if (fcmSendDto != null) {
-					fcmService.sendWeatherPushTo(fcmSendDto);
-				}
-			}
-		}
-	}
-
-	private FCMWeatherDto createNotificationMessage(Todo todo, User user) throws Exception {
-		String weatherForecast = procWeather(todo.getStart());
-		String today =
-			todo.getStart().getMonthValue() + "월 " + todo.getStart().getDayOfMonth() + "일에 ";
-
-		String recommendDate = todoService.findRecommendedTimeSlot(todo);
-
-		String title;
-
-		switch (weatherForecast) {
-			case "1" -> title = today + " 비가 올 예정입니다.";
-			case "2" -> title = today + " 비와 눈이 올 예정입니다.";
-			case "3" -> title = today + " 눈이 올 예정입니다.";
-			case "5" -> title = today + " 빗방울이 떨어질 예정입니다.";
-			case "6" -> title = today + " 빗방울과 눈이 날릴 예정입니다.";
-			case "7" -> title = today + " 눈이 날릴 예정입니다.";
-			default -> title = null;
-		}
-
-		if (title != null) {
-			return FCMWeatherDto.builder()
-				.token(user.getFcmToken())
-				.title(title)
-				.body("일정 변경을 원하시면 클릭하세요!")
-				.todoId(todo.getId())
-				.date(recommendDate)
-				.type("weather")
-				.todoTitle(todo.getTitle())
-				.build();
-		} else {
-			return null;
-		}
-	}
-
 	public FCMWeatherDto test(Long todoId) throws FirebaseMessagingException {
 
 		Todo todo = todoService.findById(todoId);

@@ -65,6 +65,8 @@ dependencies {
 	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: '3.1.6'
 	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 
+	implementation 'org.springframework.boot:spring-boot-starter-amqp'
+
 }
 
 tasks.named('test') {

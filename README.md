@@ -1,0 +1,6 @@
+![한끝 사진, 설명](https://github.com/user-attachments/assets/d86eaf4a-3c07-450c-a424-0c0e6ddf3107)
+![트러블 슈팅1](https://github.com/user-attachments/assets/9e028bfa-3deb-489c-92bb-a9d2d97b5fe6)
+![트러블 슈팅1-1](https://github.com/user-attachments/assets/1a0a0fb8-65ba-4482-a699-f9916cdec4bc)
+![트러블 슈팅2](https://github.com/user-attachments/assets/c39c5f46-4fbf-4695-8682-ac6debd393e3)
+![트러블 슈팅2-1](https://github.com/user-attachments/assets/2bb4e8dd-87ec-4c5f-92fa-84445b78480c)
+![트러블 슈팅2-2](https://github.com/user-attachments/assets/abdb6e71-b2d3-49b2-946a-9d361c8fe643)

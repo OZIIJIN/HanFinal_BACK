@@ -19,7 +19,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 		registry.addInterceptor(loginInterceptor)
 			.addPathPatterns("/**")
 			.excludePathPatterns("/api/v1/users/sign-up")
-			.excludePathPatterns("**/ws-stomp")
+			.excludePathPatterns("**/todo/**")
 			.excludePathPatterns("/actuator/**")
 			.excludePathPatterns("/error");
 	}

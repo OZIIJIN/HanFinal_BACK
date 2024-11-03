@@ -1,6 +1,5 @@
 package org.onesentence.onesentence.domain.todo.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -8,9 +7,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -24,22 +20,21 @@ import org.onesentence.onesentence.domain.fcm.dto.FCMSendDto;
 import org.onesentence.onesentence.domain.fcm.service.FCMService;
 import org.onesentence.onesentence.domain.fcm.service.SchedulerService;
 import org.onesentence.onesentence.domain.gpt.dto.GPTCallTodoRequest;
-import org.onesentence.onesentence.domain.gpt.service.GptService;
-import org.onesentence.onesentence.domain.text.dto.TextRequest;
 import org.onesentence.onesentence.domain.todo.dto.*;
 import org.onesentence.onesentence.domain.todo.entity.Todo;
 import org.onesentence.onesentence.domain.todo.entity.TodoStatus;
 import org.onesentence.onesentence.domain.todo.repository.TodoJpaRepository;
 import org.onesentence.onesentence.domain.todo.repository.TodoQuery;
 import org.onesentence.onesentence.domain.user.entity.User;
-import org.onesentence.onesentence.domain.user.repository.UserJpaRepository;
 import org.onesentence.onesentence.domain.user.service.UserService;
 import org.onesentence.onesentence.global.WebSocketEventListener;
+import org.onesentence.onesentence.global.config.RabbitMQConfig;
 import org.onesentence.onesentence.global.exception.ExceptionStatus;
 import org.onesentence.onesentence.global.exception.NotFoundException;
 import org.quartz.SchedulerException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -61,7 +56,8 @@ public class TodoServiceImpl implements TodoService {
 	private final WebSocketEventListener webSocketEventListener;
 	private final FCMService fcmService;
 	private final UserService userService;
-
+	private final RabbitTemplate rabbitTemplate;
+	private final RabbitAdmin rabbitAdmin;
 	private ScheduledFuture<?> futureMessageTask;
 
 	@Override
@@ -288,9 +284,11 @@ public class TodoServiceImpl implements TodoService {
 			.nickName(user.getNickName())
 			.build();
 
-		// 클라이언트가 연결되었는지 확인 후 메시지 전송
-		futureMessageTask = taskScheduler.schedule(() -> sendMessageWhenClientConnected(messageDto),
-			new Date(System.currentTimeMillis() + 1000)); // 5초 지연
+		String queueName = "todo-" + todoId + "-queue";
+		Queue dynamicQueue = new Queue(queueName, true);
+		rabbitAdmin.declareQueue(dynamicQueue);
+
+		rabbitTemplate.convertAndSend(queueName, messageDto);
 	}
 
 	@Override

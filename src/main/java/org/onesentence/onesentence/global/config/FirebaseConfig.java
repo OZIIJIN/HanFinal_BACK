@@ -26,14 +26,14 @@ public class FirebaseConfig {
 	@Bean
 	public FirebaseApp firebaseApp() throws IOException {
 		System.out.println("FIREBASE_KEY_PATH: " + System.getenv("FIREBASE_KEY_PATH"));
+		ClassPathResource resource = new ClassPathResource(fcmKeyPath);
+		try (InputStream serviceAccount = resource.getInputStream()) {
+			FirebaseOptions options = FirebaseOptions.builder()
+				.setCredentials(GoogleCredentials.fromStream(serviceAccount))
+				.build();
 
-		FileInputStream serviceAccount = new FileInputStream(fcmKeyPath);
-
-		FirebaseOptions options = FirebaseOptions.builder()
-			.setCredentials(GoogleCredentials.fromStream(serviceAccount))
-			.build();
-		
-		return FirebaseApp.initializeApp(options);
+			return FirebaseApp.initializeApp(options);
+		}
 	}
 	@Bean
 	public FirebaseMessaging firebaseMessaging(FirebaseApp firebaseApp) {
